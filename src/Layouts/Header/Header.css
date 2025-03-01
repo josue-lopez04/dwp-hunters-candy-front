@@ -1,0 +1,106 @@
+.site-header {
+    background-color: var(--text-light);
+    box-shadow: var(--shadow-sm);
+    position: sticky;
+    top: 0;
+    z-index: 1000;
+  }
+  
+  .header-container {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: var(--spacing-md) var(--spacing-xl);
+    max-width: 1200px;
+    margin: 0 auto;
+  }
+  
+  .logo-container {
+    flex: 0 0 auto;
+  }
+  
+  .logo-link {
+    display: flex;
+    align-items: center;
+    text-decoration: none;
+  }
+  
+  .logo-link h1 {
+    font-size: var(--font-lg);
+    font-weight: 700;
+    color: var(--primary-color);
+    margin: 0;
+  }
+  
+  .header-actions {
+    display: flex;
+    align-items: center;
+    gap: var(--spacing-md);
+  }
+  
+  .cart-icon, 
+  .profile-icon {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    position: relative;
+    color: var(--neutral-dark);
+    font-size: var(--font-lg);
+    transition: color var(--transition-fast);
+  }
+  
+  .cart-icon:hover,
+  .profile-icon:hover {
+    color: var(--primary-color);
+  }
+  
+  .cart-badge {
+    position: absolute;
+    top: -8px;
+    right: -8px;
+    background-color: var(--primary-color);
+    color: var(--text-light);
+    font-size: var(--font-xs);
+    font-weight: 700;
+    min-width: 18px;
+    height: 18px;
+    border-radius: var(--radius-circle);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0 var(--spacing-xs);
+  }
+  
+  .logout-button {
+    background-color: transparent;
+    color: var(--primary-color);
+    border: 1px solid var(--primary-color);
+    padding: 0.5rem 1rem;
+    border-radius: var(--radius-md);
+    font-weight: 600;
+    transition: all var(--transition-fast);
+    cursor: pointer;
+  }
+  
+  .logout-button:hover {
+    background-color: var(--primary-color);
+    color: var(--text-light);
+  }
+  
+  @media (max-width: 768px) {
+    .header-container {
+      padding: var(--spacing-md);
+      flex-wrap: wrap;
+    }
+    
+    .logo-container {
+      flex: 1;
+    }
+  }
+  
+  @media (max-width: 480px) {
+    .logout-button {
+      padding: 0.25rem 0.5rem;
+      font-size: var(--font-sm);
+    }
+  }

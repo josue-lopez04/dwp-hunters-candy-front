@@ -27,7 +27,7 @@ const Home = () => {
             <p>
               Todos nuestros productos son cuidadosamente seleccionados para garantizar
               la mejor calidad y durabilidad. En Hunter's Candy encontrarás desde equipamiento básico
-              hasta productos especializados para cazadores experimentados.
+              hasta productos especializados para cazadores experimentados y mucho mas.
             </p>
           </div>
           <div className="about-image">

@@ -19,33 +19,25 @@ const Login = () => {
 
   const handleSubmit = (e) => {
     e.preventDefault();
-    
-    // Simplemente iniciar sesión sin validaciones
     handleGuestLogin();
   };
 
   const handleGuestLogin = () => {
-    // Simulación de autenticación exitosa sin validaciones
     localStorage.setItem('isLoggedIn', 'true');
-    
-    // Redireccionar al Home
+
     navigate('/');
   };
 
   return (
     <div className="login-page">
       <div className="login-container">
-      <div className="register-logo">
-    <img src="/logo.jpeg" alt="Logo de HC" />
-</div>
-
-
-        
+        <div className="register-logo">
+          <img src="/logo.jpeg" alt="Logo de HC" />
+        </div>
         <div className="login-header">
           <h1>Hola bienvenido</h1>
           <p>Inicia sesión para continuar</p>
         </div>
-        
         <form onSubmit={handleSubmit} className="login-form">
           <div className="form-group">
             <label htmlFor="email">Introduce correo</label>
@@ -58,7 +50,6 @@ const Login = () => {
               placeholder="correo@ejemplo.com"
             />
           </div>
-          
           <div className="form-group">
             <label htmlFor="password">Introduce contraseña</label>
             <div className="password-input-container">
@@ -72,23 +63,23 @@ const Login = () => {
               />
             </div>
           </div>
-          
+
           <div className="forgot-password">
             <Link to="/forgot-password">¿No puedes acceder?</Link>
           </div>
-          
+
           <button type="submit" className="login-button">
             Entrar
           </button>
-          
-          <button 
-            type="button" 
-            onClick={handleGuestLogin} 
+
+          <button
+            type="button"
+            onClick={handleGuestLogin}
             className="guest-login-button"
           >
             Entrar como invitado
           </button>
-          
+
           <div className="register-link">
             <span>¿Aún no tienes cuenta?</span>
             <Link to="/register">Regístrate</Link>

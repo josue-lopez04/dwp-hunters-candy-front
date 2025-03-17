@@ -4,12 +4,14 @@ import './Home.css';
 import HeroBanner from './Components/HeroBanner';
 import FeaturedProducts from './Components/FeaturedProducts';
 import CategorySection from './Components/CategorySection';
+import Navbar from '../../Components/Navbar/Navbar';
 
 const Home = () => {
   return (
     <div className="home-page">
+      <Navbar />
       <HeroBanner />
-      
+
       <section className="section-container welcome-section">
         <h2>¿Quiénes Somos?</h2>
         <div className="about-content">
@@ -35,11 +37,8 @@ const Home = () => {
           </div>
         </div>
       </section>
-      
-      <FeaturedProducts />
-      
-      <CategorySection />
-      
+
+
       <section className="section-container cta-section">
         <div className="cta-content">
           <h2>¿Listo para tu próxima aventura?</h2>

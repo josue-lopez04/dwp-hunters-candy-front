@@ -1,5 +1,7 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
+import "./HeroBanner.css"
+
 
 const HeroBanner = () => {
   return (
@@ -16,9 +18,7 @@ const HeroBanner = () => {
           </Link>
         </div>
       </div>
-      <div className="hero-image">
-        <img src="/caza.jpeg" alt="Equipamiento para caza" />
-      </div>
+
     </div>
   );
 };

@@ -12,7 +12,7 @@
   flex-wrap: wrap;
 }
 
-.hero-content {
+.hero-content { 
   flex: 1;
   padding: 2rem;
   min-width: 300px;
@@ -117,13 +117,13 @@
 
 .about-image {
   flex: 1;
-  min-width: 300px;
+  min-width: 100px;
   display: flex;
   justify-content: center;
 }
 
 .about-image img {
-  max-width: 100%;
+  max-width: 80%;
   height: auto;
   border-radius: 8px;
   box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);

@@ -2,7 +2,6 @@ import React from 'react';
 import { Link } from 'react-router-dom';
 
 const CategorySection = () => {
-  // Mock data para categorías
   const categories = [
     {
       id: 'armas',

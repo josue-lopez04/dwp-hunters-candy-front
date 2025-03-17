@@ -1,17 +1,15 @@
 import React from 'react';
 import { Outlet } from 'react-router-dom';
+import './Footer/Footer.css';
 
 const MainLayout = () => {
   return (
     <div className="app-container">
-      <header>
-        <h1>Hunter's Candy</h1>
-      </header>
       <main className="main-content">
         <Outlet />
       </main>
       <footer>
-        <p>&copy; 2025 Hunter's Candy</p>
+        <p>&copy; 2025 Hunter's Candy/ Todos los derechos reservados</p>
       </footer>
     </div>
   );

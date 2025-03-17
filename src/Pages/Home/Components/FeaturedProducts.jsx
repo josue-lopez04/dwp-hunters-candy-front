@@ -2,12 +2,11 @@ import React from 'react';
 import { Link } from 'react-router-dom';
 
 const FeaturedProducts = () => {
-  // Mock data para productos destacados
   const featuredProducts = [
     {
       id: 1,
       name: "Rifle de caza XH-200",
-      image: "/images/products/rifle-caza.jpg",
+      image: "/rifle.webp",
       price: 12999.99,
       description: "Rifle de alto rendimiento con mira telescópica incluida"
     },
@@ -35,7 +34,6 @@ const FeaturedProducts = () => {
   ];
 
   const handleAddToCart = (product) => {
-    // Aquí iría la lógica para añadir al carrito
     console.log('Añadir al carrito:', product);
     alert(`${product.name} añadido al carrito`);
   };

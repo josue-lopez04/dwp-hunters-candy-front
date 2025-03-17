@@ -7,11 +7,8 @@ const Header = () => {
   const navigate = useNavigate();
 
   const handleLogout = () => {
-    // Eliminar la información de autenticación del localStorage
     localStorage.removeItem('isLoggedIn');
     localStorage.removeItem('user');
-    
-    // Redireccionar a la página de login
     navigate('/login');
   };
 
@@ -20,7 +17,6 @@ const Header = () => {
       <div className="header-container">
         <div className="logo-container">
           <Link to="/" className="logo-link">
-            <h1>Hunter's Candy</h1>
           </Link>
         </div>
         <Navbar />

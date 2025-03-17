@@ -22,7 +22,6 @@ const Register = () => {
             [name]: type === 'checkbox' ? checked : value
         });
 
-        // Limpiar error cuando el usuario empieza a corregir
         if (errors[name]) {
             setErrors({
                 ...errors,
@@ -34,36 +33,30 @@ const Register = () => {
     const validate = () => {
         const newErrors = {};
 
-        // Validar nombre
         if (!formData.nombre.trim()) {
             newErrors.nombre = 'El nombre es obligatorio';
         }
 
-        // Validar apellido
         if (!formData.apellido.trim()) {
             newErrors.apellido = 'El apellido es obligatorio';
         }
 
-        // Validar email
         if (!formData.email) {
             newErrors.email = 'El correo electrónico es obligatorio';
         } else if (!/\S+@\S+\.\S+/.test(formData.email)) {
             newErrors.email = 'El correo electrónico no es válido';
         }
 
-        // Validar contraseña
         if (!formData.password) {
             newErrors.password = 'La contraseña es obligatoria';
         } else if (formData.password.length < 6) {
             newErrors.password = 'La contraseña debe tener al menos 6 caracteres';
         }
 
-        // Validar confirmación de contraseña
         if (formData.password !== formData.confirmPassword) {
             newErrors.confirmPassword = 'Las contraseñas no coinciden';
         }
 
-        // Validar términos y condiciones
         if (!formData.acceptTerms) {
             newErrors.acceptTerms = 'Debes aceptar los términos y condiciones';
         }
@@ -80,14 +73,12 @@ const Register = () => {
             return;
         }
 
-        // Simulación de registro exitoso
         localStorage.setItem('isLoggedIn', 'true');
         localStorage.setItem('user', JSON.stringify({
             email: formData.email,
             name: `${formData.nombre} ${formData.apellido}`
         }));
 
-        // Redireccionar al Home
         navigate('/');
     };
 

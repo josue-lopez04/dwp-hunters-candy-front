@@ -1,106 +1,102 @@
 .site-header {
-    background-color: var(--text-light);
-    box-shadow: var(--shadow-sm);
-    position: sticky;
-    top: 0;
-    z-index: 1000;
-  }
-  
-  .header-container {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    padding: var(--spacing-md) var(--spacing-xl);
-    max-width: 1200px;
-    margin: 0 auto;
-  }
-  
-  .logo-container {
-    flex: 0 0 auto;
-  }
-  
-  .logo-link {
-    display: flex;
-    align-items: center;
-    text-decoration: none;
-  }
-  
-  .logo-link h1 {
-    font-size: var(--font-lg);
-    font-weight: 700;
-    color: var(--primary-color);
-    margin: 0;
-  }
-  
+  background-color: #fff;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+  padding: 15px 0;
+  position: sticky;
+  top: 0;
+  z-index: 1000;
+}
+
+.header-container {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 0 15px;
+}
+
+.logo-container {
+  max-width: 150px;
+}
+
+.logo-link {
+  display: block;
+}
+
+.logo-link img {
+  width: 100%;
+  height: auto;
+}
+
+.header-actions {
+  display: flex;
+  align-items: center;
+  gap: 20px;
+}
+
+.cart-icon, .profile-icon {
+  position: relative;
+  font-size: 1.5rem;
+  color: #333;
+  text-decoration: none;
+  transition: color 0.3s ease;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.cart-icon:hover, .profile-icon:hover {
+  color: #f0770d;
+}
+
+.cart-badge {
+  position: absolute;
+  top: -10px;
+  right: -10px;
+  background-color: #f0770d;
+  color: white;
+  font-size: 0.7rem;
+  border-radius: 50%;
+  width: 18px;
+  height: 18px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.user-name {
+  font-size: 0.9rem;
+  font-weight: 500;
+  margin-left: 5px;
+}
+
+.logout-button {
+  background-color: #f44336;
+  color: white;
+  border: none;
+  border-radius: 4px;
+  padding: 8px 16px;
+  cursor: pointer;
+  font-weight: 500;
+  transition: background-color 0.3s ease;
+}
+
+.logout-button:hover {
+  background-color: #d32f2f;
+}
+
+@media (max-width: 768px) {
   .header-actions {
-    display: flex;
-    align-items: center;
-    gap: var(--spacing-md);
+    gap: 15px;
   }
   
-  .cart-icon, 
-  .profile-icon {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    position: relative;
-    color: var(--neutral-dark);
-    font-size: var(--font-lg);
-    transition: color var(--transition-fast);
-  }
-  
-  .cart-icon:hover,
-  .profile-icon:hover {
-    color: var(--primary-color);
-  }
-  
-  .cart-badge {
-    position: absolute;
-    top: -8px;
-    right: -8px;
-    background-color: var(--primary-color);
-    color: var(--text-light);
-    font-size: var(--font-xs);
-    font-weight: 700;
-    min-width: 18px;
-    height: 18px;
-    border-radius: var(--radius-circle);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    padding: 0 var(--spacing-xs);
+  .user-name {
+    display: none;
   }
   
   .logout-button {
-    background-color: transparent;
-    color: var(--primary-color);
-    border: 1px solid var(--primary-color);
-    padding: 0.5rem 1rem;
-    border-radius: var(--radius-md);
-    font-weight: 600;
-    transition: all var(--transition-fast);
-    cursor: pointer;
+    padding: 6px 12px;
+    font-size: 0.8rem;
   }
-  
-  .logout-button:hover {
-    background-color: var(--primary-color);
-    color: var(--text-light);
-  }
-  
-  @media (max-width: 768px) {
-    .header-container {
-      padding: var(--spacing-md);
-      flex-wrap: wrap;
-    }
-    
-    .logo-container {
-      flex: 1;
-    }
-  }
-  
-  @media (max-width: 480px) {
-    .logout-button {
-      padding: 0.25rem 0.5rem;
-      font-size: var(--font-sm);
-    }
-  }
+}

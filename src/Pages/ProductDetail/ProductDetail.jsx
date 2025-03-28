@@ -1,53 +1,34 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import './ProductDetail.css';
+import productService from '../../services/product.service';
+import { useCart } from '../../context/CartContext';
+import Navbar from '../../Components/Navbar/Navbar';
 
 const ProductDetail = () => {
   const { id } = useParams();
+  const { addToCart } = useCart();
   const [product, setProduct] = useState(null);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState('');
   const [quantity, setQuantity] = useState(1);
   const [activeTab, setActiveTab] = useState('description');
 
   useEffect(() => {
-    setTimeout(() => {
-      const mockProduct = {
-        id: id,
-        name: "Rifle de caza XH-200",
-        price: 12999.99,
-        discount: 10,
-        finalPrice: 11699.99,
-        stock: 15,
-        description: "Rifle de caza profesional con precisión excepcional. Ideal para cazadores experimentados que buscan máximo rendimiento y fiabilidad en sus expediciones. Fabricado con materiales de alta calidad y diseñado para durar años de uso intensivo.",
-        specifications: {
-          material: "Acero inoxidable y polímeros de alta resistencia",
-          length: "110 cm",
-          weight: "3.2 kg",
-          caliber: ".308 Winchester",
-          capacity: "5 + 1 balas",
-          scope: "Incluida (4-16x50mm)",
-          warranty: "5 años del fabricante"
-        },
-        images: [
-          "/rifle.webp",
-          "/rifle2.jpeg",
-          "/rifle3.jpeg"
-        ],
-        reviews: [
-          { id: 1, user: "Carlos Mendoza", rating: 5, comment: "Excelente rifle, muy preciso y fácil de manejar.", date: "2025-01-15" },
-          { id: 2, user: "Miguel Ángel Pérez", rating: 4, comment: "Buena relación calidad-precio. Lo he usado varias veces y funciona muy bien.", date: "2025-01-02" },
-          { id: 3, user: "Javier González", rating: 5, comment: "La mejor compra que he hecho para caza. Altamente recomendado.", date: "2024-12-20" }
-        ],
-        relatedProducts: [
-          { id: 2, name: "Munición Premium .308", price: 899.99, image: "/balas.webp" },
-          { id: 3, name: "Mira telescópica HD", price: 2499.99, image: "/images/products/mira-telescopica.jpg" },
-          { id: 4, name: "Kit de limpieza para rifle", price: 599.99, image: "/images/products/kit-limpieza.jpg" }
-        ]
-      };
+    const fetchProductDetails = async () => {
+      try {
+        setLoading(true);
+        const productData = await productService.getProductById(id);
+        setProduct(productData);
+        setLoading(false);
+      } catch (err) {
+        console.error('Error fetching product:', err);
+        setError('No pudimos cargar los detalles del producto. Por favor, intenta de nuevo más tarde.');
+        setLoading(false);
+      }
+    };
 
-      setProduct(mockProduct);
-      setLoading(false);
-    }, 800);
+    fetchProductDetails();
   }, [id]);
 
   const incrementQuantity = () => {
@@ -63,7 +44,10 @@ const ProductDetail = () => {
   };
 
   const handleAddToCart = () => {
-    alert(`Añadido al carrito: ${quantity} unidad(es) de ${product?.name}`);
+    if (product) {
+      addToCart(product, quantity);
+      alert(`Añadido al carrito: ${quantity} unidad(es) de ${product.name}`);
+    }
   };
 
   if (loading) {
@@ -75,11 +59,11 @@ const ProductDetail = () => {
     );
   }
 
-  if (!product) {
+  if (error || !product) {
     return (
       <div className="product-not-found">
         <h2>Producto no encontrado</h2>
-        <p>Lo sentimos, el producto que estás buscando no está disponible.</p>
+        <p>{error || 'Lo sentimos, el producto que estás buscando no está disponible.'}</p>
         <Link to="/inventory" className="back-to-shop-btn">
           Volver a la tienda
         </Link>
@@ -87,8 +71,12 @@ const ProductDetail = () => {
     );
   }
 
+  // Calcular el precio final con descuento si existe
+  const finalPrice = product.finalPrice || (product.price * (1 - (product.discount || 0) / 100));
+
   return (
     <div className="product-detail-page">
+      <Navbar />
       <div className="product-detail-container">
         <div className="product-detail-breadcrumb">
           <Link to="/">Inicio</Link> &gt;
@@ -99,10 +87,15 @@ const ProductDetail = () => {
         <div className="product-detail-main">
           <div className="product-gallery">
             <div className="product-main-image">
-              <img src={product.images[0]} alt={product.name} />
+              <img 
+                src={product.images && product.images.length > 0 
+                  ? product.images[0] 
+                  : "/images/placeholder.jpg"} 
+                alt={product.name} 
+              />
             </div>
             <div className="product-thumbnails">
-              {product.images.map((image, index) => (
+              {product.images && product.images.map((image, index) => (
                 <div key={index} className="product-thumbnail">
                   <img src={image} alt={`${product.name} - vista ${index + 1}`} />
                 </div>
@@ -117,7 +110,7 @@ const ProductDetail = () => {
               {product.discount > 0 && (
                 <span className="product-original-price">${product.price.toFixed(2)}</span>
               )}
-              <span className="product-final-price">${product.finalPrice.toFixed(2)}</span>
+              <span className="product-final-price">${finalPrice.toFixed(2)}</span>
               {product.discount > 0 && (
                 <span className="product-discount">-{product.discount}%</span>
               )}
@@ -168,16 +161,16 @@ const ProductDetail = () => {
             </div>
 
             <div className="product-short-description">
-              <p>{product.description.substring(0, 150)}...</p>
+              <p>{product.description && product.description.substring(0, 150)}...</p>
             </div>
 
             <div className="product-meta">
               <div className="product-code">
-                <span>Código: PRD-{product.id.toString().padStart(5, '0')}</span>
+                <span>Código: PRD-{product._id ? product._id.substring(0, 8) : ''}</span>
               </div>
               <div className="product-categories">
                 <span>Categoría: </span>
-                <Link to="/inventory?category=armas">Armas y Municiones</Link>
+                <Link to={`/inventory?category=${product.category}`}>{product.category}</Link>
               </div>
             </div>
           </div>
@@ -201,7 +194,7 @@ const ProductDetail = () => {
               className={`tab-btn ${activeTab === 'reviews' ? 'active' : ''}`}
               onClick={() => setActiveTab('reviews')}
             >
-              Reseñas ({product.reviews.length})
+              Reseñas ({product.reviews ? product.reviews.length : 0})
             </button>
           </div>
 
@@ -218,7 +211,7 @@ const ProductDetail = () => {
               <div className="tab-content specifications-content">
                 <table className="specs-table">
                   <tbody>
-                    {Object.entries(product.specifications).map(([key, value]) => (
+                    {product.specifications && Object.entries(product.specifications).map(([key, value]) => (
                       <tr key={key}>
                         <th>{key.charAt(0).toUpperCase() + key.slice(1)}</th>
                         <td>{value}</td>
@@ -232,25 +225,31 @@ const ProductDetail = () => {
             {activeTab === 'reviews' && (
               <div className="tab-content reviews-content">
                 <div className="reviews-list">
-                  {product.reviews.map(review => (
-                    <div key={review.id} className="review-item">
-                      <div className="review-header">
-                        <span className="review-author">{review.user}</span>
-                        <div className="review-rating">
-                          {[...Array(5)].map((_, i) => (
-                            <i
-                              key={i}
-                              className={`fa fa-star ${i < review.rating ? 'filled' : ''}`}
-                            ></i>
-                          ))}
+                  {product.reviews && product.reviews.length > 0 ? (
+                    product.reviews.map(review => (
+                      <div key={review._id} className="review-item">
+                        <div className="review-header">
+                          <span className="review-author">{review.userName || 'Usuario'}</span>
+                          <div className="review-rating">
+                            {[...Array(5)].map((_, i) => (
+                              <i
+                                key={i}
+                                className={`fa fa-star ${i < review.rating ? 'filled' : ''}`}
+                              ></i>
+                            ))}
+                          </div>
+                          <span className="review-date">
+                            {new Date(review.createdAt).toLocaleDateString()}
+                          </span>
                         </div>
-                        <span className="review-date">{review.date}</span>
+                        <div className="review-content">
+                          <p>{review.comment}</p>
+                        </div>
                       </div>
-                      <div className="review-content">
-                        <p>{review.comment}</p>
-                      </div>
-                    </div>
-                  ))}
+                    ))
+                  ) : (
+                    <p>No hay reseñas para este producto todavía.</p>
+                  )}
                 </div>
 
                 <div className="write-review">
@@ -279,25 +278,27 @@ const ProductDetail = () => {
           </div>
         </div>
 
-        <div className="related-products">
-          <h2>Productos relacionados</h2>
-          <div className="related-products-grid">
-            {product.relatedProducts.map(relatedProduct => (
-              <div key={relatedProduct.id} className="related-product-card">
-                <div className="related-product-image">
-                  <img src={relatedProduct.image} alt={relatedProduct.name} />
+        {product.relatedProducts && product.relatedProducts.length > 0 && (
+          <div className="related-products">
+            <h2>Productos relacionados</h2>
+            <div className="related-products-grid">
+              {product.relatedProducts.map(relatedProduct => (
+                <div key={relatedProduct.id} className="related-product-card">
+                  <div className="related-product-image">
+                    <img src={relatedProduct.image} alt={relatedProduct.name} />
+                  </div>
+                  <div className="related-product-info">
+                    <h3>{relatedProduct.name}</h3>
+                    <p className="related-product-price">${relatedProduct.price.toFixed(2)}</p>
+                    <Link to={`/inventory/${relatedProduct.id}`} className="view-product-btn">
+                      Ver detalles
+                    </Link>
+                  </div>
                 </div>
-                <div className="related-product-info">
-                  <h3>{relatedProduct.name}</h3>
-                  <p className="related-product-price">${relatedProduct.price.toFixed(2)}</p>
-                  <Link to={`/inventory/${relatedProduct.id}`} className="view-product-btn">
-                    Ver detalles
-                  </Link>
-                </div>
-              </div>
-            ))}
+              ))}
+            </div>
           </div>
-        </div>
+        )}
       </div>
     </div>
   );

@@ -1,8 +1,13 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import './SearchBar.css';
 
-const SearchBar = ({ onSearch }) => {
-  const [query, setQuery] = useState('');
+const SearchBar = ({ onSearch, initialValue = '' }) => {
+  const [query, setQuery] = useState(initialValue);
+  
+  // Actualizar query cuando cambia initialValue (para sincronización con URL)
+  useEffect(() => {
+    setQuery(initialValue);
+  }, [initialValue]);
 
   const handleSubmit = (e) => {
     e.preventDefault();
@@ -11,6 +16,11 @@ const SearchBar = ({ onSearch }) => {
 
   const handleChange = (e) => {
     setQuery(e.target.value);
+    
+    // Si el usuario borra toda la búsqueda, actualizar inmediatamente
+    if (e.target.value === '') {
+      onSearch('');
+    }
   };
 
   const handleClear = () => {
@@ -22,6 +32,7 @@ const SearchBar = ({ onSearch }) => {
     <div className="search-bar">
       <form onSubmit={handleSubmit}>
         <div className="search-input-container">
+          <i className="fa fa-search search-icon"></i>
           <input
             type="text"
             className="search-input"
@@ -41,7 +52,6 @@ const SearchBar = ({ onSearch }) => {
           )}
         </div>
         <button type="submit" className="search-btn">
-          <i className="fa fa-search"></i>
           Buscar
         </button>
       </form>

@@ -1,19 +1,26 @@
 import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import './Register.css';
+import { useAuth } from '../../context/AuthContext';
 
 const Register = () => {
     const navigate = useNavigate();
+    const { register } = useAuth();
+    
     const [formData, setFormData] = useState({
-        nombre: '',
-        apellido: '',
+        username: '',
         email: '',
+        firstName: '',
+        lastName: '',
+        phone: '',
         password: '',
         confirmPassword: '',
         acceptTerms: false
     });
     const [errors, setErrors] = useState({});
     const [showPassword, setShowPassword] = useState(false);
+    const [loading, setLoading] = useState(false);
+    const [serverError, setServerError] = useState('');
 
     const handleChange = (e) => {
         const { name, value, type, checked } = e.target;
@@ -28,23 +35,30 @@ const Register = () => {
                 [name]: ''
             });
         }
+        
+        // Limpiar error del servidor cuando el usuario comienza a escribir
+        if (serverError) setServerError('');
     };
 
     const validate = () => {
         const newErrors = {};
 
-        if (!formData.nombre.trim()) {
-            newErrors.nombre = 'El nombre es obligatorio';
-        }
-
-        if (!formData.apellido.trim()) {
-            newErrors.apellido = 'El apellido es obligatorio';
+        if (!formData.username.trim()) {
+            newErrors.username = 'El nombre de usuario es obligatorio';
         }
 
         if (!formData.email) {
             newErrors.email = 'El correo electrónico es obligatorio';
         } else if (!/\S+@\S+\.\S+/.test(formData.email)) {
             newErrors.email = 'El correo electrónico no es válido';
+        }
+        
+        if (!formData.firstName.trim()) {
+            newErrors.firstName = 'El nombre es obligatorio';
+        }
+        
+        if (!formData.lastName.trim()) {
+            newErrors.lastName = 'El apellido es obligatorio';
         }
 
         if (!formData.password) {
@@ -64,7 +78,7 @@ const Register = () => {
         return newErrors;
     };
 
-    const handleSubmit = (e) => {
+    const handleSubmit = async (e) => {
         e.preventDefault();
 
         const validationErrors = validate();
@@ -73,13 +87,26 @@ const Register = () => {
             return;
         }
 
-        localStorage.setItem('isLoggedIn', 'true');
-        localStorage.setItem('user', JSON.stringify({
-            email: formData.email,
-            name: `${formData.nombre} ${formData.apellido}`
-        }));
-
-        navigate('/');
+        try {
+            setLoading(true);
+            
+            // Preparar los datos para enviar al backend
+            const userData = {
+                username: formData.username,
+                email: formData.email,
+                firstName: formData.firstName,
+                lastName: formData.lastName,
+                phone: formData.phone,
+                password: formData.password
+            };
+            
+            await register(userData);
+            navigate('/');
+        } catch (error) {
+            setServerError(error.message || 'Error al registrar el usuario');
+        } finally {
+            setLoading(false);
+        }
     };
 
     const toggleShowPassword = () => {
@@ -97,35 +124,25 @@ const Register = () => {
                     <p>Crea tu cuenta para comenzar</p>
                 </div>
 
-                <form onSubmit={handleSubmit} className="register-form">
-                    <div className="form-row">
-                        <div className="form-group">
-                            <label htmlFor="nombre">Introduce nombre</label>
-                            <input
-                                type="text"
-                                id="nombre"
-                                name="nombre"
-                                value={formData.nombre}
-                                onChange={handleChange}
-                                className={errors.nombre ? 'input-error' : ''}
-                                placeholder="Nombre"
-                            />
-                            {errors.nombre && <div className="error-message">{errors.nombre}</div>}
-                        </div>
+                {serverError && (
+                    <div className="error-alert">
+                        {serverError}
+                    </div>
+                )}
 
-                        <div className="form-group">
-                            <label htmlFor="apellido">Introduce apellido</label>
-                            <input
-                                type="text"
-                                id="apellido"
-                                name="apellido"
-                                value={formData.apellido}
-                                onChange={handleChange}
-                                className={errors.apellido ? 'input-error' : ''}
-                                placeholder="Apellido"
-                            />
-                            {errors.apellido && <div className="error-message">{errors.apellido}</div>}
-                        </div>
+                <form onSubmit={handleSubmit} className="register-form">
+                    <div className="form-group">
+                        <label htmlFor="username">Nombre de usuario</label>
+                        <input
+                            type="text"
+                            id="username"
+                            name="username"
+                            value={formData.username}
+                            onChange={handleChange}
+                            className={errors.username ? 'input-error' : ''}
+                            placeholder="Nombre de usuario"
+                        />
+                        {errors.username && <div className="error-message">{errors.username}</div>}
                     </div>
 
                     <div className="form-group">
@@ -140,6 +157,47 @@ const Register = () => {
                             placeholder="correo@ejemplo.com"
                         />
                         {errors.email && <div className="error-message">{errors.email}</div>}
+                    </div>
+                    
+                    <div className="form-row">
+                        <div className="form-group">
+                            <label htmlFor="firstName">Nombre</label>
+                            <input
+                                type="text"
+                                id="firstName"
+                                name="firstName"
+                                value={formData.firstName}
+                                onChange={handleChange}
+                                className={errors.firstName ? 'input-error' : ''}
+                                placeholder="Tu nombre"
+                            />
+                            {errors.firstName && <div className="error-message">{errors.firstName}</div>}
+                        </div>
+                        <div className="form-group">
+                            <label htmlFor="lastName">Apellidos</label>
+                            <input
+                                type="text"
+                                id="lastName"
+                                name="lastName"
+                                value={formData.lastName}
+                                onChange={handleChange}
+                                className={errors.lastName ? 'input-error' : ''}
+                                placeholder="Tus apellidos"
+                            />
+                            {errors.lastName && <div className="error-message">{errors.lastName}</div>}
+                        </div>
+                    </div>
+                    
+                    <div className="form-group">
+                        <label htmlFor="phone">Teléfono (opcional)</label>
+                        <input
+                            type="tel"
+                            id="phone"
+                            name="phone"
+                            value={formData.phone}
+                            onChange={handleChange}
+                            placeholder="Tu número de teléfono"
+                        />
                     </div>
 
                     <div className="form-group">
@@ -195,8 +253,12 @@ const Register = () => {
                         {errors.acceptTerms && <div className="error-message">{errors.acceptTerms}</div>}
                     </div>
 
-                    <button type="submit" className="register-button">
-                        Registrar
+                    <button 
+                        type="submit" 
+                        className="register-button"
+                        disabled={loading}
+                    >
+                        {loading ? 'Registrando...' : 'Registrar'}
                     </button>
 
                     <div className="login-link">

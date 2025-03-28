@@ -31,6 +31,9 @@ const CartItem = ({ item, updateQuantity, removeItem }) => {
     return item.price * item.quantity;
   };
 
+  // Asegurémonos de que el ID es una cadena antes de usar padStart
+  const formattedId = item.id ? item.id.toString().padStart(5, '0') : '00000';
+
   return (
     <div className="cart-item">
       <div className="item-product">
@@ -42,7 +45,7 @@ const CartItem = ({ item, updateQuantity, removeItem }) => {
             {item.name}
           </Link>
           <div className="item-meta">
-            <span className="item-code">Código: PRD-{item.id.toString().padStart(5, '0')}</span>
+            <span className="item-code">Código: PRD-{formattedId}</span>
             {item.stock <= 5 && (
               <span className="item-stock low-stock">
                 Solo {item.stock} en stock

@@ -1,0 +1,50 @@
+.
+├── README.md
+├── Repo.txt
+├── estructura_proyecto.txt
+├── hunters-candy-backend
+│   ├── estructura_proyecto.txt
+│   ├── node_modules
+│   ├── package-lock.json
+│   ├── package.json
+│   └── src
+├── package-lock.json
+├── package.json
+├── public
+│   ├── balas.webp
+│   ├── botas_impermeable.webp
+│   ├── campaña.jpeg
+│   ├── caza.jpeg
+│   ├── chaqueta.jpeg
+│   ├── favicon.ico
+│   ├── index.html
+│   ├── kit.jpg
+│   ├── kit_carnada.jpeg
+│   ├── logo.jpeg
+│   ├── logo192.png
+│   ├── logo512.png
+│   ├── manifest.json
+│   ├── mira_telescopica.webp
+│   ├── rifle.webp
+│   ├── rifle2.jpeg
+│   ├── rifle3.jpeg
+│   └── robots.txt
+└── src
+    ├── App.css
+    ├── App.js
+    ├── App.test.js
+    ├── Components
+        
+    ├── Layouts
+    ├── Pages
+    ├── assets
+    ├── context
+    ├── hooks
+    ├── index.css
+    ├── index.js
+    ├── logo.svg
+    ├── reportWebVitals.js
+    ├── services
+    ├── setupTests.js
+    └── utils
+

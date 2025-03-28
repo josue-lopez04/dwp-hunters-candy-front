@@ -403,35 +403,37 @@
   }
   
   .cart-empty-icon {
-    font-size: 4rem;
-    color: #e9ecef;
-    margin-bottom: 1.5rem;
+    font-size: 60px;
+    color: #ccc;
+    margin-bottom: 20px;
   }
   
   .cart-empty h2 {
-    font-size: 1.5rem;
-    color: #212529;
-    margin-bottom: 1rem;
+    margin-bottom: 15px;
+    color: #333;
   }
   
   .cart-empty p {
-    color: #6c757d;
-    margin-bottom: 1.5rem;
+    margin-bottom: 30px;
+    color: #666;
+    max-width: 500px;
   }
   
   .continue-shopping-btn {
     display: inline-block;
-    background-color: #28a745;
+    background-color: #3f51b5;
     color: white;
-    padding: 0.75rem 1.5rem;
+    padding: 12px 24px;
     border-radius: 4px;
     text-decoration: none;
-    font-weight: 600;
+    font-weight: 500;
     transition: background-color 0.2s;
   }
   
   .continue-shopping-btn:hover {
-    background-color: #218838;
+    background-color: #303f9f;
+    text-decoration: none;
+    color: white;
   }
   
   /* Loading state */

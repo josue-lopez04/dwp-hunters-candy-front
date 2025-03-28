@@ -5,14 +5,16 @@ import ProductGrid from './Components/ProductGrid';
 import ProductFilters from './Components/ProductFilters';
 import SearchBar from '../../Components/SearchBar/SearchBar';
 import Navbar from '../../Components/Navbar/Navbar';
+import productService from '../../services/product.service';
 
 const Inventory = () => {
-  const [searchParams] = useSearchParams();
+  const [searchParams, setSearchParams] = useSearchParams();
   const initialCategory = searchParams.get('category') || 'all';
   
   const [products, setProducts] = useState([]);
   const [filteredProducts, setFilteredProducts] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState('');
   const [filters, setFilters] = useState({
     category: initialCategory,
     priceRange: [0, 20000],
@@ -20,164 +22,68 @@ const Inventory = () => {
   });
   const [searchQuery, setSearchQuery] = useState('');
 
+  // Actualizar searchParams cuando cambian los filtros
   useEffect(() => {
-    setTimeout(() => {
-      const mockProducts = [
-        {
-          id: 1,
-          name: "Rifle de caza XH-200",
-          image: "/rifle.webp",
-          price: 12999.99,
-          category: "armas",
-          description: "Rifle de alto rendimiento con mira telescópica incluida",
-          stock: 15
-        },
-        {
-          id: 2,
-          name: "Chaqueta Camuflaje Premium",
-          image: "/chaqueta.jpeg",
-          price: 2499.99,
-          category: "ropa",
-          description: "Chaqueta resistente al agua con patrón de camuflaje forestal",
-          stock: 8
-        },
-        {
-          id: 3,
-          name: "Kit de Carnada Profesional",
-          image: "/kit_carnada.jpeg",
-          price: 899.99,
-          category: "carnada",
-          description: "Set completo con diferentes tipos de carnada para diversos animales",
-          stock: 30
-        },
-        {
-          id: 4,
-          name: "Botas de Caza Impermeables",
-          image: "/botas_impermeable.webp",
-          price: 1899.99,
-          category: "ropa",
-          description: "Botas de alta resistencia con suela antideslizante para terrenos difíciles",
-          stock: 12
-        },
-        {
-          id: 5,
-          name: "Mira Telescópica HD 4-16x50mm",
-          image: "/mira_telescopica.webp",
-          price: 4999.99,
-          category: "accesorios",
-          description: "Mira telescópica de alta definición con zoom de 4x a 16x",
-          stock: 5
-        },
-        {
-          id: 6,
-          name: "Kit de Limpieza para Rifles",
-          image: "/kit.jpg",
-          price: 599.99,
-          category: "accesorios",
-          description: "Kit completo para la limpieza y mantenimiento de rifles",
-          stock: 25
-        },
-        {
-          id: 7,
-          name: "Munición Premium .308",
-          image: "/balas.webp",
-          price: 799.99,
-          category: "armas",
-          description: "Caja de munición calibre .308 de alta precisión",
-          stock: 50
-        },
-        {
-          id: 8,
-          name: "Tienda de Campaña Camuflaje",
-          image: "/campaña.jpeg", 
-          price: 3499.99,
-          category: "accesorios",
-          description: "Tienda de campaña resistente con patrón de camuflaje",
-          stock: 3
-        },
-        {
-          id: 9,
-          name: "Pantalones Tácticos Impermeables",
-          image: "/images/products/pantalones-tacticos.jpg",
-          price: 1299.99,
-          category: "ropa",
-          description: "Pantalones tácticos con múltiples bolsillos y resistentes al agua",
-          stock: 18
-        },
-        {
-          id: 10,
-          name: "Kit de Supervivencia Avanzado",
-          image: "/images/products/kit-supervivencia.jpg",
-          price: 1999.99,
-          category: "accesorios",
-          description: "Kit completo con todo lo necesario para situaciones de supervivencia",
-          stock: 7
-        },
-        {
-          id: 11,
-          name: "Chaleco Táctico Multibolsillos",
-          image: "/images/products/chaleco-tactico.jpg",
-          price: 1799.99,
-          category: "ropa",
-          description: "Chaleco táctico con múltiples bolsillos y ajustes personalizables",
-          stock: 9
-        },
-        {
-          id: 12,
-          name: "Binoculares de Alta Precisión",
-          image: "/images/products/binoculares.jpg",
-          price: 2999.99,
-          category: "accesorios",
-          description: "Binoculares con zoom 10x42 y visión nocturna",
-          stock: 6
-        }
-      ];
-      
-      setProducts(mockProducts);
-      setFilteredProducts(mockProducts);
-      setLoading(false);
-    }, 800);
-  }, []);
-
-  useEffect(() => {
-    let result = [...products];
+    const newParams = new URLSearchParams(searchParams);
     
-    if (filters.category !== 'all') {
-      result = result.filter(product => product.category === filters.category);
+    if (filters.category && filters.category !== 'all') {
+      newParams.set('category', filters.category);
+    } else {
+      newParams.delete('category');
     }
     
-    result = result.filter(product => 
-      product.price >= filters.priceRange[0] && 
-      product.price <= filters.priceRange[1]
-    );
+    if (filters.sortBy && filters.sortBy !== 'featured') {
+      newParams.set('sort', filters.sortBy);
+    } else {
+      newParams.delete('sort');
+    }
     
     if (searchQuery) {
-      const query = searchQuery.toLowerCase();
-      result = result.filter(product => 
-        product.name.toLowerCase().includes(query) || 
-        product.description.toLowerCase().includes(query)
-      );
+      newParams.set('search', searchQuery);
+    } else {
+      newParams.delete('search');
     }
     
-    switch (filters.sortBy) {
-      case 'price-asc':
-        result.sort((a, b) => a.price - b.price);
-        break;
-      case 'price-desc':
-        result.sort((a, b) => b.price - a.price);
-        break;
-      case 'name-asc':
-        result.sort((a, b) => a.name.localeCompare(b.name));
-        break;
-      case 'name-desc':
-        result.sort((a, b) => b.name.localeCompare(a.name));
-        break;
-      default:
-        break;
-    }
-    
-    setFilteredProducts(result);
-  }, [products, filters, searchQuery]);
+    setSearchParams(newParams);
+  }, [filters, searchQuery, setSearchParams]);
+
+  useEffect(() => {
+    const fetchProducts = async () => {
+      try {
+        setLoading(true);
+        
+        // Obtener todos los productos desde la API con los filtros
+        const apiFilters = {
+          category: filters.category !== 'all' ? filters.category : undefined,
+          minPrice: filters.priceRange[0],
+          maxPrice: filters.priceRange[1],
+          sortBy: filters.sortBy,
+          keyword: searchQuery
+        };
+        
+        const response = await productService.getProducts(apiFilters);
+        
+        // Verificar la estructura de la respuesta
+        if (response && response.products) {
+          setProducts(response.products);
+          setFilteredProducts(response.products);
+        } else if (Array.isArray(response)) {
+          setProducts(response);
+          setFilteredProducts(response);
+        } else {
+          throw new Error('Formato de respuesta inesperado');
+        }
+        
+        setLoading(false);
+      } catch (err) {
+        console.error('Error al cargar productos:', err);
+        setError('Error al cargar los productos. Por favor, intenta de nuevo más tarde.');
+        setLoading(false);
+      }
+    };
+
+    fetchProducts();
+  }, [filters, searchQuery]);
 
   const handleFilterChange = (newFilters) => {
     setFilters({ ...filters, ...newFilters });
@@ -189,12 +95,18 @@ const Inventory = () => {
 
   return (
     <div className="inventory-page">
-            <Navbar />
+      <Navbar />
       <div className="inventory-header">
         <h1>Catálogo de Productos</h1>
         <p>Encuentra todo lo que necesitas para tu próxima aventura de caza</p>
-        <SearchBar onSearch={handleSearch} />
+        <SearchBar onSearch={handleSearch} initialValue={searchQuery} />
       </div>
+      
+      {error && (
+        <div className="error-message">
+          <i className="fa fa-exclamation-circle"></i> {error}
+        </div>
+      )}
       
       <div className="inventory-content">
         <ProductFilters 
@@ -211,7 +123,7 @@ const Inventory = () => {
           ) : (
             <>
               <div className="inventory-results">
-                <p>Mostrando {filteredProducts.length} de {products.length} productos</p>
+                <p>Mostrando {filteredProducts.length} producto(s)</p>
               </div>
               
               <ProductGrid products={filteredProducts} />

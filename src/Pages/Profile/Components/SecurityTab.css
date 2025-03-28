@@ -1,0 +1,51 @@
+/* Añadir a Profile.css o SecurityTab.css */
+.status-indicator {
+    display: inline-block;
+    padding: 4px 12px;
+    border-radius: 12px;
+    font-size: 14px;
+    font-weight: 500;
+    margin-right: 15px;
+  }
+  
+  .status-indicator.enabled {
+    background-color: #e8f5e9;
+    color: #2e7d32;
+    border: 1px solid #c8e6c9;
+  }
+  
+  .status-indicator.disabled {
+    background-color: #ffebee;
+    color: #c62828;
+    border: 1px solid #ffcdd2;
+  }
+  
+  .enable-mfa-btn {
+    background-color: #3f51b5;
+    color: white;
+    border: none;
+    padding: 8px 16px;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 14px;
+    transition: background-color 0.2s;
+  }
+  
+  .enable-mfa-btn:hover {
+    background-color: #303f9f;
+  }
+  
+  .disable-mfa-btn {
+    background-color: #f44336;
+    color: white;
+    border: none;
+    padding: 8px 16px;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 14px;
+    transition: background-color 0.2s;
+  }
+  
+  .disable-mfa-btn:hover {
+    background-color: #d32f2f;
+  }

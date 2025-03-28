@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import './Contact.css';
 import Navbar from '../../Components/Navbar/Navbar';
 
@@ -15,6 +15,64 @@ const Contact = () => {
     success: false,
     message: ''
   });
+  const [isLoading, setIsLoading] = useState(false);
+  const [validation, setValidation] = useState({
+    name: '',
+    email: '',
+    subject: '',
+    message: ''
+  });
+
+  // Cargar Font Awesome para los iconos
+  useEffect(() => {
+    const link = document.createElement('link');
+    link.rel = 'stylesheet';
+    link.href = 'https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css';
+    document.head.appendChild(link);
+
+    return () => {
+      document.head.removeChild(link);
+    };
+  }, []);
+
+  const validateForm = () => {
+    let isValid = true;
+    const newValidation = {
+      name: '',
+      email: '',
+      subject: '',
+      message: ''
+    };
+
+    if (!formData.name.trim()) {
+      newValidation.name = 'El nombre es requerido';
+      isValid = false;
+    }
+
+    if (!formData.email.trim()) {
+      newValidation.email = 'El correo electrónico es requerido';
+      isValid = false;
+    } else if (!/^\S+@\S+\.\S+$/.test(formData.email)) {
+      newValidation.email = 'Ingresa un correo electrónico válido';
+      isValid = false;
+    }
+
+    if (!formData.subject.trim()) {
+      newValidation.subject = 'El asunto es requerido';
+      isValid = false;
+    }
+
+    if (!formData.message.trim()) {
+      newValidation.message = 'El mensaje es requerido';
+      isValid = false;
+    } else if (formData.message.trim().length < 10) {
+      newValidation.message = 'El mensaje debe tener al menos 10 caracteres';
+      isValid = false;
+    }
+
+    setValidation(newValidation);
+    return isValid;
+  };
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -22,26 +80,45 @@ const Contact = () => {
       ...formData,
       [name]: value
     });
+
+    // Limpiar mensajes de validación al escribir
+    if (validation[name]) {
+      setValidation({
+        ...validation,
+        [name]: ''
+      });
+    }
   };
 
   const handleSubmit = (e) => {
     e.preventDefault();
     
-    console.log('Formulario enviado:', formData);
+    if (!validateForm()) {
+      return;
+    }
     
-    setFormStatus({
-      submitted: true,
-      success: true,
-      message: 'Tu mensaje ha sido enviado correctamente. Nos pondremos en contacto contigo pronto.'
-    });
+    setIsLoading(true);
     
-    setFormData({
-      name: '',
-      email: '',
-      phone: '',
-      subject: '',
-      message: ''
-    });
+    // Simulación de envío de formulario
+    setTimeout(() => {
+      console.log('Formulario enviado:', formData);
+      
+      setFormStatus({
+        submitted: true,
+        success: true,
+        message: 'Tu mensaje ha sido enviado correctamente. Nos pondremos en contacto contigo pronto.'
+      });
+      
+      setFormData({
+        name: '',
+        email: '',
+        phone: '',
+        subject: '',
+        message: ''
+      });
+      
+      setIsLoading(false);
+    }, 1500);
   };
 
   return (
@@ -57,7 +134,7 @@ const Contact = () => {
           <div className="contact-info">
             <div className="info-section">
               <div className="info-icon">
-                <i className="fa fa-map-marker"></i>
+                <i className="fas fa-map-marker-alt"></i>
               </div>
               <div className="info-content">
                 <h3>Dirección</h3>
@@ -69,7 +146,7 @@ const Contact = () => {
             
             <div className="info-section">
               <div className="info-icon">
-                <i className="fa fa-phone"></i>
+                <i className="fas fa-phone-alt"></i>
               </div>
               <div className="info-content">
                 <h3>Teléfono</h3>
@@ -81,11 +158,11 @@ const Contact = () => {
             
             <div className="info-section">
               <div className="info-icon">
-                <i className="fa fa-envelope"></i>
+                <i className="fas fa-envelope"></i>
               </div>
               <div className="info-content">
                 <h3>Email</h3>
-                <p>info@hunterscandy.com</p>
+                <p>hunterscandy@hunterscandy.com</p>
                 <p>soporte@hunterscandy.com</p>
               </div>
             </div>
@@ -94,16 +171,16 @@ const Contact = () => {
               <h3>Síguenos</h3>
               <div className="social-icons">
                 <a href="https://facebook.com" target="_blank" rel="noopener noreferrer" className="social-icon">
-                  <i className="fa fa-facebook"></i>
+                  <i className="fab fa-facebook-f"></i>
                 </a>
                 <a href="https://instagram.com" target="_blank" rel="noopener noreferrer" className="social-icon">
-                  <i className="fa fa-instagram"></i>
+                  <i className="fab fa-instagram"></i>
                 </a>
                 <a href="https://twitter.com" target="_blank" rel="noopener noreferrer" className="social-icon">
-                  <i className="fa fa-twitter"></i>
+                  <i className="fab fa-twitter"></i>
                 </a>
                 <a href="https://youtube.com" target="_blank" rel="noopener noreferrer" className="social-icon">
-                  <i className="fa fa-youtube"></i>
+                  <i className="fab fa-youtube"></i>
                 </a>
               </div>
             </div>
@@ -115,7 +192,7 @@ const Contact = () => {
             {formStatus.submitted && formStatus.success ? (
               <div className="form-success">
                 <div className="success-icon">
-                  <i className="fa fa-check-circle"></i>
+                  <i className="fas fa-check-circle"></i>
                 </div>
                 <p>{formStatus.message}</p>
                 <button 
@@ -137,8 +214,9 @@ const Contact = () => {
                       value={formData.name}
                       onChange={handleChange}
                       placeholder="Tu nombre"
-                      required
+                      className={validation.name ? 'input-error' : ''}
                     />
+                    {validation.name && <span className="error-message">{validation.name}</span>}
                   </div>
                   <div className="form-group">
                     <label htmlFor="email">Correo electrónico *</label>
@@ -149,8 +227,9 @@ const Contact = () => {
                       value={formData.email}
                       onChange={handleChange}
                       placeholder="tucorreo@ejemplo.com"
-                      required
+                      className={validation.email ? 'input-error' : ''}
                     />
+                    {validation.email && <span className="error-message">{validation.email}</span>}
                   </div>
                 </div>
                 
@@ -175,8 +254,9 @@ const Contact = () => {
                       value={formData.subject}
                       onChange={handleChange}
                       placeholder="Asunto de tu mensaje"
-                      required
+                      className={validation.subject ? 'input-error' : ''}
                     />
+                    {validation.subject && <span className="error-message">{validation.subject}</span>}
                   </div>
                 </div>
                 
@@ -189,13 +269,22 @@ const Contact = () => {
                     onChange={handleChange}
                     placeholder="Escribe tu mensaje aquí..."
                     rows="6"
-                    required
+                    className={validation.message ? 'input-error' : ''}
                   ></textarea>
+                  {validation.message && <span className="error-message">{validation.message}</span>}
                 </div>
                 
                 <div className="form-actions">
-                  <button type="submit" className="submit-btn">
-                    Enviar mensaje
+                  <button type="submit" className="submit-btn" disabled={isLoading}>
+                    {isLoading ? (
+                      <>
+                        <i className="fas fa-spinner fa-spin"></i> Enviando...
+                      </>
+                    ) : (
+                      <>
+                        <i className="fas fa-paper-plane"></i> Enviar mensaje
+                      </>
+                    )}
                   </button>
                 </div>
               </form>
@@ -203,14 +292,21 @@ const Contact = () => {
           </div>
         </div>
 
-        <div className="contact-map">
-          <div className="map-container">
-            {/* Aquí iría un mapa de Google Maps o similar, ya vere */}
-            <div className="map-placeholder">
-              <div className="map-icon">
-                <i className="fa fa-map"></i>
+        <div className="contact-location">
+          <h2>Nuestra ubicación</h2>
+          <div className="location-details">
+            <div className="location-info">
+              <i className="fas fa-directions"></i>
+              <p>Estamos ubicados en una zona comercial de fácil acceso, con estacionamiento disponible para nuestros clientes.</p>
+            </div>
+            <div className="location-hours">
+              <i className="fas fa-clock"></i>
+              <div>
+                <h3>Horario de atención</h3>
+                <p>Lunes a Viernes: 9:00 AM - 6:00 PM</p>
+                <p>Sábado: 10:00 AM - 3:00 PM</p>
+                <p>Domingo: Cerrado</p>
               </div>
-              <p>Mapa de ubicación</p>
             </div>
           </div>
         </div>

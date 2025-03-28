@@ -36,3 +36,32 @@
     transform: rotate(360deg);
   }
 }
+
+/* Estilos para mensajes de error */
+.error-alert {
+  background-color: #ffebee;
+  color: #d32f2f;
+  padding: 12px;
+  border-radius: 4px;
+  margin-bottom: 20px;
+  text-align: center;
+  font-size: 14px;
+  border: 1px solid #ef9a9a;
+}
+
+.error-message {
+  color: #d32f2f;
+  font-size: 12px;
+  margin-top: 4px;
+  margin-bottom: 4px;
+}
+
+.input-error {
+  border-color: #d32f2f !important;
+}
+
+/* Estilos para el botón deshabilitado */
+button:disabled {
+  opacity: 0.7;
+  cursor: not-allowed;
+}

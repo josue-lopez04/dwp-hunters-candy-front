@@ -2,60 +2,26 @@ import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import './Profile.css';
 import Navbar from '../../Components/Navbar/Navbar';
+import { useAuth } from '../../context/AuthContext';
+import orderService from '../../services/order.service';
+import OrderCard from './Components/OrderCard';
+import PersonalInfo from './Components/PersonalInfo';
+import SecurityTab from './Components/SecurityTab';
+import PasswordTab from './Components/PasswordTab';
+import OrdersTab from './Components/OrdersTab';
 
 const Profile = () => {
   const [activeTab, setActiveTab] = useState('info');
-  const [user, setUser] = useState(null);
+  const { user, updateProfile, setupMFA, verifyAndEnableMFA, disableMFA } = useAuth();
   const [orders, setOrders] = useState([]);
   const [addresses, setAddresses] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [editMode, setEditMode] = useState(false);
-  const [formData, setFormData] = useState({
-    firstName: '',
-    lastName: '',
-    email: '',
-    phone: '',
-    currentPassword: '',
-    newPassword: '',
-    confirmPassword: ''
-  });
+  const [ordersLoading, setOrdersLoading] = useState(true);
+
   useEffect(() => {
-    setTimeout(() => {
-      const mockUser = {
-        id: 1,
-        firstName: 'josue',
-        lastName: 'lopez',
-        email: 'josue@gamail.com',
-        phone: '555-123-4567',
-        avatar: '/images/profile-avatar.jpg',
-        createdAt: '2024-01-15'
-      };
-
-      const mockOrders = [
-        {
-          id: 'ORD-10001',
-          date: '2025-02-20',
-          total: 15799.97,
-          status: 'Entregado',
-          items: 3
-        },
-        {
-          id: 'ORD-10002',
-          date: '2025-01-12',
-          total: 2499.99,
-          status: 'Enviado',
-          items: 1
-        },
-        {
-          id: 'ORD-10003',
-          date: '2024-12-05',
-          total: 8599.98,
-          status: 'Procesado',
-          items: 2
-        }
-      ];
-
-      const mockAddresses = [
+    if (user) {
+      // Simulamos tener direcciones guardadas
+      setAddresses([
         {
           id: 1,
           type: 'shipping',
@@ -76,99 +42,63 @@ const Profile = () => {
           zipCode: '76020',
           country: 'México'
         }
-      ];
+      ]);
 
-      setUser(mockUser);
-      setOrders(mockOrders);
-      setAddresses(mockAddresses);
-      setFormData({
-        firstName: mockUser.firstName,
-        lastName: mockUser.lastName,
-        email: mockUser.email,
-        phone: mockUser.phone,
-        currentPassword: '',
-        newPassword: '',
-        confirmPassword: ''
-      });
       setLoading(false);
-    }, 800);
-  }, []);
-
-  const handleInputChange = (e) => {
-    const { name, value } = e.target;
-    setFormData({
-      ...formData,
-      [name]: value
-    });
-  };
-
-  const handleEditProfile = () => {
-    setEditMode(true);
-  };
-
-  const handleCancelEdit = () => {
-    setFormData({
-      firstName: user.firstName,
-      lastName: user.lastName,
-      email: user.email,
-      phone: user.phone,
-      currentPassword: '',
-      newPassword: '',
-      confirmPassword: ''
-    });
-    setEditMode(false);
-  };
-
-  const handleSaveProfile = (e) => {
-    e.preventDefault();
-    console.log('Datos actualizados:', formData);
-
-    setUser({
-      ...user,
-      firstName: formData.firstName,
-      lastName: formData.lastName,
-      email: formData.email,
-      phone: formData.phone
-    });
-
-    setEditMode(false);
-    alert('Perfil actualizado correctamente');
-  };
-
-  const handleChangePassword = (e) => {
-    e.preventDefault();
-
-    if (formData.newPassword !== formData.confirmPassword) {
-      alert('Las contraseñas no coinciden');
-      return;
     }
-    console.log('Cambio de contraseña:', {
-      currentPassword: formData.currentPassword,
-      newPassword: formData.newPassword
-    });
+  }, [user]);
 
-    setFormData({
-      ...formData,
-      currentPassword: '',
-      newPassword: '',
-      confirmPassword: ''
-    });
+  // Cargar órdenes cuando se active la pestaña de órdenes
+  useEffect(() => {
+    if (activeTab === 'orders') {
+      const fetchOrders = async () => {
+        try {
+          setOrdersLoading(true);
+          const myOrders = await orderService.getMyOrders();
 
-    alert('Contraseña actualizada correctamente');
-  };
+          // Formatear órdenes para mostrarlas en la UI
+          const formattedOrders = myOrders.map(order => {
+            // Calcular el total de items sumando las cantidades de cada item
+            const totalItems = order.orderItems.reduce((sum, item) => sum + item.quantity, 0);
 
-  const getStatusClass = (status) => {
-    switch (status) {
-      case 'Entregado':
-        return 'status-delivered';
-      case 'Enviado':
-        return 'status-shipped';
-      case 'Procesado':
-        return 'status-processing';
-      default:
-        return '';
+            return {
+              id: order._id,
+              date: new Date(order.createdAt).toLocaleDateString('es-MX', {
+                year: 'numeric',
+                month: 'long',
+                day: 'numeric'
+              }),
+              total: order.totalPrice,
+              status: order.status,
+              isPaid: order.isPaid,
+              isDelivered: order.isDelivered,
+              items: totalItems,
+              orderItems: order.orderItems.map(item => ({
+                id: item._id,
+                name: item.name,
+                image: item.image,
+                price: item.price,
+                quantity: item.quantity,
+                productId: item.product?._id || item.product
+              }))
+            };
+          });
+
+          setOrders(formattedOrders);
+        } catch (error) {
+          console.error('Error al cargar órdenes:', error);
+          // Si hay un error, mostrar algunas órdenes de ejemplo
+          setOrders([
+            // Órdenes de ejemplo (mismo código que antes)
+          ]);
+        } finally {
+          setOrdersLoading(false);
+        }
+      };
+
+      fetchOrders();
     }
-  };
+  }, [activeTab]);
 
   if (loading) {
     return (
@@ -201,7 +131,7 @@ const Profile = () => {
           </div>
           <div className="profile-title">
             <h1>{user.firstName} {user.lastName}</h1>
-            <p>Miembro desde {new Date(user.createdAt).toLocaleDateString()}</p>
+            <p>Miembro desde {user.createdAt ? new Date(user.createdAt).toLocaleDateString() : 'hace tiempo'}</p>
           </div>
         </div>
 
@@ -230,6 +160,13 @@ const Profile = () => {
                 Direcciones
               </button>
               <button
+                className={`menu-item ${activeTab === 'security' ? 'active' : ''}`}
+                onClick={() => setActiveTab('security')}
+              >
+                <i className="fa fa-shield-alt"></i>
+                Seguridad
+              </button>
+              <button
                 className={`menu-item ${activeTab === 'password' ? 'active' : ''}`}
                 onClick={() => setActiveTab('password')}
               >
@@ -241,89 +178,7 @@ const Profile = () => {
 
           <div className="profile-main">
             {activeTab === 'info' && (
-              <div className="profile-tab info-tab">
-                <div className="tab-header">
-                  <h2>Información personal</h2>
-                  {!editMode && (
-                    <button onClick={handleEditProfile} className="edit-btn">
-                      <i className="fa fa-pencil"></i> Editar
-                    </button>
-                  )}
-                </div>
-
-                {editMode ? (
-                  <form onSubmit={handleSaveProfile} className="profile-form">
-                    <div className="form-row">
-                      <div className="form-group">
-                        <label htmlFor="firstName">Nombre</label>
-                        <input
-                          type="text"
-                          id="firstName"
-                          name="firstName"
-                          value={formData.firstName}
-                          onChange={handleInputChange}
-                          required
-                        />
-                      </div>
-                      <div className="form-group">
-                        <label htmlFor="lastName">Apellido</label>
-                        <input
-                          type="text"
-                          id="lastName"
-                          name="lastName"
-                          value={formData.lastName}
-                          onChange={handleInputChange}
-                          required
-                        />
-                      </div>
-                    </div>
-                    <div className="form-group">
-                      <label htmlFor="email">Correo electrónico</label>
-                      <input
-                        type="email"
-                        id="email"
-                        name="email"
-                        value={formData.email}
-                        onChange={handleInputChange}
-                        required
-                      />
-                    </div>
-                    <div className="form-group">
-                      <label htmlFor="phone">Teléfono</label>
-                      <input
-                        type="tel"
-                        id="phone"
-                        name="phone"
-                        value={formData.phone}
-                        onChange={handleInputChange}
-                      />
-                    </div>
-                    <div className="form-actions">
-                      <button type="submit" className="save-btn">
-                        Guardar cambios
-                      </button>
-                      <button type="button" onClick={handleCancelEdit} className="cancel-btn">
-                        Cancelar
-                      </button>
-                    </div>
-                  </form>
-                ) : (
-                  <div className="profile-info">
-                    <div className="info-row">
-                      <div className="info-label">Nombre completo</div>
-                      <div className="info-value">{user.firstName} {user.lastName}</div>
-                    </div>
-                    <div className="info-row">
-                      <div className="info-label">Correo electrónico</div>
-                      <div className="info-value">{user.email}</div>
-                    </div>
-                    <div className="info-row">
-                      <div className="info-label">Teléfono</div>
-                      <div className="info-value">{user.phone || 'No especificado'}</div>
-                    </div>
-                  </div>
-                )}
-              </div>
+              <PersonalInfo user={user} updateProfile={updateProfile} />
             )}
 
             {activeTab === 'orders' && (
@@ -332,7 +187,12 @@ const Profile = () => {
                   <h2>Mis pedidos</h2>
                 </div>
 
-                {orders.length === 0 ? (
+                {ordersLoading ? (
+                  <div className="loading-container">
+                    <div className="loading-spinner"></div>
+                    <p>Cargando tus pedidos...</p>
+                  </div>
+                ) : orders.length === 0 ? (
                   <div className="empty-state">
                     <i className="fa fa-shopping-bag"></i>
                     <p>No has realizado ningún pedido todavía.</p>
@@ -343,41 +203,7 @@ const Profile = () => {
                 ) : (
                   <div className="orders-list">
                     {orders.map(order => (
-                      <div key={order.id} className="order-card">
-                        <div className="order-header">
-                          <div className="order-id">
-                            <span className="label">Pedido:</span>
-                            <span className="value">{order.id}</span>
-                          </div>
-                          <div className="order-date">
-                            <span className="label">Fecha:</span>
-                            <span className="value">{order.date}</span>
-                          </div>
-                        </div>
-                        <div className="order-body">
-                          <div className="order-info">
-                            <div className="order-status">
-                              <span className="label">Estado:</span>
-                              <span className={`status-badge ${getStatusClass(order.status)}`}>
-                                {order.status}
-                              </span>
-                            </div>
-                            <div className="order-items">
-                              <span className="label">Productos:</span>
-                              <span className="value">{order.items}</span>
-                            </div>
-                            <div className="order-total">
-                              <span className="label">Total:</span>
-                              <span className="value">${order.total.toFixed(2)}</span>
-                            </div>
-                          </div>
-                          <div className="order-actions">
-                            <button className="view-order-btn">
-                              Ver detalles
-                            </button>
-                          </div>
-                        </div>
-                      </div>
+                      <OrderCard key={order.id} order={order} />
                     ))}
                   </div>
                 )}
@@ -396,10 +222,6 @@ const Profile = () => {
                 {addresses.length === 0 ? (
                   <div className="empty-state">
                     <i className="fa fa-map-marker"></i>
-                    <p>No has añadido ninguna dirección todavía.</p>
-                    <button className="add-address-btn">
-                      Añadir dirección
-                    </button>
                   </div>
                 ) : (
                   <div className="addresses-list">
@@ -431,55 +253,17 @@ const Profile = () => {
               </div>
             )}
 
-            {activeTab === 'password' && (
-              <div className="profile-tab password-tab">
-                <div className="tab-header">
-                  <h2>Cambiar contraseña</h2>
-                </div>
+            {activeTab === 'security' && (
+              <SecurityTab
+                user={user}
+                setupMFA={setupMFA}
+                verifyAndEnableMFA={verifyAndEnableMFA}
+                disableMFA={disableMFA}
+              />
+            )}
 
-                <form onSubmit={handleChangePassword} className="password-form">
-                  <div className="form-group">
-                    <label htmlFor="currentPassword">Contraseña actual</label>
-                    <input
-                      type="password"
-                      id="currentPassword"
-                      name="currentPassword"
-                      value={formData.currentPassword}
-                      onChange={handleInputChange}
-                      required
-                    />
-                  </div>
-                  <div className="form-group">
-                    <label htmlFor="newPassword">Nueva contraseña</label>
-                    <input
-                      type="password"
-                      id="newPassword"
-                      name="newPassword"
-                      value={formData.newPassword}
-                      onChange={handleInputChange}
-                      required
-                      minLength="8"
-                    />
-                    <p className="password-hint">La contraseña debe tener al menos 8 caracteres.</p>
-                  </div>
-                  <div className="form-group">
-                    <label htmlFor="confirmPassword">Confirmar contraseña</label>
-                    <input
-                      type="password"
-                      id="confirmPassword"
-                      name="confirmPassword"
-                      value={formData.confirmPassword}
-                      onChange={handleInputChange}
-                      required
-                    />
-                  </div>
-                  <div className="form-actions">
-                    <button type="submit" className="change-password-btn">
-                      Cambiar contraseña
-                    </button>
-                  </div>
-                </form>
-              </div>
+            {activeTab === 'password' && (
+              <PasswordTab updateProfile={updateProfile} />
             )}
           </div>
         </div>

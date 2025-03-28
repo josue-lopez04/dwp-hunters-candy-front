@@ -5,8 +5,10 @@ import HeroBanner from './Components/HeroBanner';
 import FeaturedProducts from './Components/FeaturedProducts';
 import CategorySection from './Components/CategorySection';
 import Navbar from '../../Components/Navbar/Navbar';
+import { useSocket } from '../../context/SocketContext';
 
 const Home = () => {
+  const { addTestNotification } = useSocket();
   return (
     <div className="home-page">
       <Navbar />

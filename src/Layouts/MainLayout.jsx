@@ -1,6 +1,8 @@
+// src/Layouts/MainLayout.jsx
 import React from 'react';
 import { Outlet } from 'react-router-dom';
-import './Footer/Footer.css';
+import Footer from './Footer/Footer';
+import './MainLayout.css';
 
 const MainLayout = () => {
   return (
@@ -8,9 +10,7 @@ const MainLayout = () => {
       <main className="main-content">
         <Outlet />
       </main>
-      <footer>
-        <p>&copy; 2025 Hunter's Candy/ Todos los derechos reservados</p>
-      </footer>
+      <Footer />
     </div>
   );
 };

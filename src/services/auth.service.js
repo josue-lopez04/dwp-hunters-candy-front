@@ -1,7 +1,7 @@
 import axios from 'axios';
 
 // Crear una instancia de axios con la URL base
-const API_URL = 'http://localhost:5000/api/users';
+const API_URL = `${process.env.REACT_APP_API_URL}/users` || 'http://localhost:5000/api/users';
 
 // Configuración de axios
 const api = axios.create({
@@ -30,7 +30,7 @@ const authService = {
 // Iniciar sesión
 login: async (username, password) => {
   try {
-    const response = await api.post('/login', { username, password });
+    const response = await api.post('/users/login', { username, password });
     
     // Si se requiere MFA, retornar sin guardar token
     if (response.data.requireMFA) {
@@ -225,6 +225,6 @@ updateUserProfile: async (userData) => {
       throw error.response ? error.response.data : new Error('Error de conexión');
     }
   }
-};
+}; 
 
 export default authService;

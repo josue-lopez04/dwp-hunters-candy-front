@@ -17,7 +17,8 @@ export const SocketProvider = ({ children }) => {
   // Conectar al servidor WebSocket
   useEffect(() => {
     try {
-      const newSocket = io('http://localhost:5000');
+        const SOCKET_URL = process.env.REACT_APP_API_URL;
+        const newSocket = io(SOCKET_URL);
       setSocket(newSocket);
       
       // Hacer el socket disponible globalmente para que otros componentes puedan emitir eventos

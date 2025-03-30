@@ -1,5 +1,4 @@
-// Servicio para gestionar el carrito de compras en el localStorage
-// Servicio para gestionar el carrito de compras en el localStorage
+
 const cartService = {
   // Obtener todos los items del carrito
   getCart: () => {
@@ -7,8 +6,6 @@ const cartService = {
     return cart ? JSON.parse(cart) : [];
   },
   
-  // Añadir un producto al carrito
-// En cart.service.js, modificar la función addToCart
 
 // Añadir un producto al carrito
 addToCart: (product, quantity = 1) => {

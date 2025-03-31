@@ -1,7 +1,15 @@
 import React, { useState, useEffect } from 'react';
-import { useAuth } from '../../context/AuthContext';
+import useAuth from '../../hooks/useAuth';
 import './MFASetup.css';
 
+/**
+ * Componente para configurar la autenticación de dos factores (MFA)
+ * Ubicación: /src/Components/MFASetup/MFASetup.jsx
+ * 
+ * @param {Object} props - Propiedades del componente
+ * @param {Function} props.onSetupComplete - Función a ejecutar cuando la configuración es exitosa
+ * @returns {JSX.Element} Componente de configuración MFA
+ */
 const MFASetup = ({ onSetupComplete }) => {
   const [qrCode, setQrCode] = useState('');
   const [secret, setSecret] = useState('');
@@ -9,8 +17,10 @@ const MFASetup = ({ onSetupComplete }) => {
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(true);
   const [verifying, setVerifying] = useState(false);
+  const [currentStep, setCurrentStep] = useState(1);
   const { setupMFA, verifyAndEnableMFA } = useAuth();
 
+  // Generar código QR y secreto al cargar el componente
   useEffect(() => {
     const generateMFA = async () => {
       try {
@@ -47,6 +57,23 @@ const MFASetup = ({ onSetupComplete }) => {
     }
   };
 
+  const handleTokenChange = (e) => {
+    // Solo permitir dígitos y limitar a 6 caracteres
+    const value = e.target.value.replace(/\D/g, '').slice(0, 6);
+    setToken(value);
+    
+    // Limpiar mensaje de error cuando el usuario comienza a escribir
+    if (error) setError('');
+  };
+
+  const nextStep = () => {
+    setCurrentStep(currentStep + 1);
+  };
+
+  const prevStep = () => {
+    setCurrentStep(currentStep - 1);
+  };
+
   if (loading) {
     return (
       <div className="mfa-setup-loading">
@@ -60,59 +87,97 @@ const MFASetup = ({ onSetupComplete }) => {
     <div className="mfa-setup-container">
       <h2>Configurar autenticación de dos factores</h2>
       
-      <div className="mfa-setup-steps">
+      <div className="progress-bar">
+        <div className={`progress-step ${currentStep >= 1 ? 'active' : ''}`}>1</div>
+        <div className="progress-line"></div>
+        <div className={`progress-step ${currentStep >= 2 ? 'active' : ''}`}>2</div>
+        <div className="progress-line"></div>
+        <div className={`progress-step ${currentStep >= 3 ? 'active' : ''}`}>3</div>
+      </div>
+      
+      {currentStep === 1 && (
         <div className="setup-step">
-          <div className="step-number">1</div>
-          <div className="step-content">
-            <h3>Instala una aplicación autenticadora</h3>
-            <p>Descarga e instala Google Authenticator, Microsoft Authenticator o Authy en tu dispositivo móvil.</p>
-          </div>
-        </div>
-        
-        <div className="setup-step">
-          <div className="step-number">2</div>
-          <div className="step-content">
-            <h3>Escanea el código QR</h3>
-            <p>Abre la aplicación autenticadora y escanea el siguiente código QR:</p>
-            
-            <div className="qr-code-container">
-              {qrCode ? (
-                <img src={qrCode} alt="Código QR para configuración MFA" />
-              ) : (
-                <div className="qr-error">Error al cargar el código QR</div>
-              )}
+          <h3>1. Instala una aplicación autenticadora</h3>
+          <p>Descarga e instala una de estas aplicaciones en tu dispositivo móvil:</p>
+          
+          <div className="authenticator-apps">
+            <div className="authenticator-app">
+              <i className="fa fa-google"></i>
+              <span>Google Authenticator</span>
             </div>
-            
-            <div className="manual-entry">
-              <h4>¿No puedes escanear el código?</h4>
-              <p>Ingresa este código manualmente en tu aplicación:</p>
-              <div className="secret-key">{secret}</div>
+            <div className="authenticator-app">
+              <i className="fa fa-microsoft"></i>
+              <span>Microsoft Authenticator</span>
+            </div>
+            <div className="authenticator-app">
+              <i className="fa fa-shield-alt"></i>
+              <span>Authy</span>
             </div>
           </div>
+          
+          <div className="step-actions">
+            <button className="next-button" onClick={nextStep}>
+              Continuar <i className="fa fa-arrow-right"></i>
+            </button>
+          </div>
         </div>
-        
+      )}
+      
+      {currentStep === 2 && (
         <div className="setup-step">
-          <div className="step-number">3</div>
-          <div className="step-content">
-            <h3>Ingresa el código de verificación</h3>
-            <p>Ingresa el código de 6 dígitos que aparece en tu aplicación autenticadora:</p>
+          <h3>2. Escanea el código QR</h3>
+          <p>Abre la aplicación autenticadora y escanea el siguiente código QR:</p>
+          
+          <div className="qr-code-container">
+            {qrCode ? (
+              <img src={qrCode} alt="Código QR para configuración MFA" />
+            ) : (
+              <div className="qr-error">Error al cargar el código QR</div>
+            )}
+          </div>
+          
+          <div className="manual-entry">
+            <h4>¿No puedes escanear el código?</h4>
+            <p>Ingresa este código manualmente en tu aplicación:</p>
+            <div className="secret-key">{secret}</div>
+          </div>
+          
+          <div className="step-actions">
+            <button className="back-button" onClick={prevStep}>
+              <i className="fa fa-arrow-left"></i> Atrás
+            </button>
+            <button className="next-button" onClick={nextStep}>
+              Continuar <i className="fa fa-arrow-right"></i>
+            </button>
+          </div>
+        </div>
+      )}
+      
+      {currentStep === 3 && (
+        <div className="setup-step">
+          <h3>3. Ingresa el código de verificación</h3>
+          <p>Ingresa el código de 6 dígitos que aparece en tu aplicación autenticadora:</p>
+          
+          {error && <div className="mfa-error">{error}</div>}
+          
+          <form onSubmit={handleVerify} className="verify-form">
+            <div className="form-group">
+              <input
+                type="text"
+                value={token}
+                onChange={handleTokenChange}
+                placeholder="000000"
+                maxLength="6"
+                autoFocus
+              />
+              <p className="field-hint">Este paso verifica que has configurado correctamente la autenticación de dos factores</p>
+              <p className="field-hint">Nota importante: si ves el mensaje "Código inválido. Inténtalo de nuevo." y ya lo intentastes varas veces, prueba borrando la cuenta en tu aplicacion de autenticación y escanea el codigo nuevamente</p>
+            </div>
             
-            {error && <div className="mfa-error">{error}</div>}
-            
-            <form onSubmit={handleVerify} className="verify-form">
-              <div className="form-group">
-                <input
-                  type="text"
-                  value={token}
-                  onChange={(e) => {
-                    setToken(e.target.value.replace(/\D/g, ''));
-                    setError('');
-                  }}
-                  placeholder="000000"
-                  maxLength="6"
-                />
-              </div>
-              
+            <div className="step-actions">
+              <button className="back-button" onClick={prevStep}>
+                <i className="fa fa-arrow-left"></i> Atrás
+              </button>
               <button 
                 type="submit" 
                 className="verify-button"
@@ -120,12 +185,12 @@ const MFASetup = ({ onSetupComplete }) => {
               >
                 {verifying ? 'Verificando...' : 'Verificar y activar'}
               </button>
-            </form>
-          </div>
+            </div>
+          </form>
         </div>
-      </div>
+      )}
     </div>
   );
 };
 
-export default MFASetup;    
+export default MFASetup;

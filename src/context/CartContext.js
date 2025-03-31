@@ -4,6 +4,15 @@ import cartService from '../services/cart.service';
 // Crear el contexto del carrito
 const CartContext = createContext();
 
+// Hook personalizado para usar el contexto del carrito
+export const useCart = () => {
+  const context = useContext(CartContext);
+  if (!context) {
+    throw new Error('useCart debe ser utilizado dentro de un CartProvider');
+  }
+  return context;
+};
+
 // Definir el estado inicial
 const initialState = {
   cartItems: [],
@@ -152,15 +161,6 @@ export const CartProvider = ({ children }) => {
   };
 
   return <CartContext.Provider value={value}>{children}</CartContext.Provider>;
-};
-
-// Hook personalizado para usar el contexto del carrito
-export const useCart = () => {
-  const context = useContext(CartContext);
-  if (context === undefined) {
-    throw new Error('useCart debe ser utilizado dentro de un CartProvider');
-  }
-  return context;
 };
 
 export default CartContext;

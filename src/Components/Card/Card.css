@@ -1,0 +1,53 @@
+.card {
+    background-color: white;
+    border-radius: 8px;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+    overflow: hidden;
+    border: 1px solid #e5e7eb;
+    transition: all 0.2s ease;
+  }
+  
+  .card-hoverable:hover {
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+    transform: translateY(-2px);
+  }
+  
+  .card-header {
+    padding: 16px 20px;
+    border-bottom: 1px solid #e5e7eb;
+  }
+  
+  .card-title {
+    margin: 0;
+    font-size: 18px;
+    font-weight: 600;
+    color: #111827;
+  }
+  
+  .card-body {
+    padding: 20px;
+  }
+  
+  .card-footer {
+    padding: 16px 20px;
+    border-top: 1px solid #e5e7eb;
+    display: flex;
+    justify-content: flex-end;
+  }
+  
+  /* Card variants */
+  .card-primary {
+    border-top: 4px solid #4f46e5;
+  }
+  
+  .card-success {
+    border-top: 4px solid #10b981;
+  }
+  
+  .card-warning {
+    border-top: 4px solid #f59e0b;
+  }
+  
+  .card-danger {
+    border-top: 4px solid #ef4444;
+  }

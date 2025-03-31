@@ -1,4 +1,3 @@
-// src/Pages/ResetPassword/ResetPassword.jsx
 import React, { useState, useEffect } from 'react';
 import { Link, useParams, useNavigate } from 'react-router-dom';
 import './ResetPassword.css';
@@ -7,20 +6,28 @@ import authService from '../../services/auth.service';
 const ResetPassword = () => {
   const { token } = useParams();
   const navigate = useNavigate();
+  
   const [formData, setFormData] = useState({
     password: '',
     confirmPassword: ''
+  });
+  const [passwordStrength, setPasswordStrength] = useState({
+    score: 0,
+    message: 'Muy débil',
+    color: '#ef4444'
   });
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
   const [success, setSuccess] = useState(false);
   const [validToken, setValidToken] = useState(true);
+  const [showPassword, setShowPassword] = useState(false);
 
+  // Verificar token al cargar
   useEffect(() => {
-    // Aquí podríamos verificar si el token es válido sin revelar información sensible
     if (!token) {
       setValidToken(false);
     }
+    // También podríamos verificar el token con el backend aquí
   }, [token]);
 
   const handleChange = (e) => {
@@ -30,14 +37,72 @@ const ResetPassword = () => {
       [name]: value
     });
     
+    // Evaluar fuerza de la contraseña si el campo es password
+    if (name === 'password') {
+      checkPasswordStrength(value);
+    }
+    
     // Limpiar error cuando el usuario escribe
     if (error) setError('');
+  };
+
+  const togglePasswordVisibility = () => {
+    setShowPassword(!showPassword);
+  };
+
+  const checkPasswordStrength = (password) => {
+    // Criterios de evaluación
+    const hasLowerCase = /[a-z]/.test(password);
+    const hasUpperCase = /[A-Z]/.test(password);
+    const hasNumber = /\d/.test(password);
+    const hasSpecialChar = /[!@#$%^&*(),.?":{}|<>]/.test(password);
+    const hasMinLength = password.length >= 8;
+    
+    // Calcular puntuación (0-4)
+    let score = 0;
+    if (hasLowerCase) score++;
+    if (hasUpperCase) score++;
+    if (hasNumber) score++;
+    if (hasSpecialChar) score++;
+    if (hasMinLength) score++;
+    
+    // Determinar mensaje y color basado en puntuación
+    let message = '';
+    let color = '';
+    
+    switch(true) {
+      case (score === 0 || score === 1):
+        message = 'Muy débil';
+        color = '#ef4444'; // Rojo
+        break;
+      case (score === 2):
+        message = 'Débil';
+        color = '#f59e0b'; // Naranja
+        break;
+      case (score === 3):
+        message = 'Media';
+        color = '#fbbf24'; // Amarillo
+        break;
+      case (score === 4):
+        message = 'Fuerte';
+        color = '#22c55e'; // Verde
+        break;
+      case (score === 5):
+        message = 'Muy fuerte';
+        color = '#16a34a'; // Verde oscuro
+        break;
+      default:
+        message = 'Muy débil';
+        color = '#ef4444';
+    }
+    
+    setPasswordStrength({ score, message, color });
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     
-    // Validación básica
+    // Validación de contraseñas
     if (formData.password !== formData.confirmPassword) {
       setError('Las contraseñas no coinciden');
       return;
@@ -48,12 +113,17 @@ const ResetPassword = () => {
       return;
     }
     
+    if (passwordStrength.score < 3) {
+      setError('Por favor, elige una contraseña más segura');
+      return;
+    }
+    
     try {
       setLoading(true);
       await authService.resetPassword(token, formData.password);
       setSuccess(true);
-    } catch (err) {
-      setError(err.message || 'Error al restablecer la contraseña. El enlace puede haber expirado.');
+    } catch (error) {
+      setError(error.message || 'Token inválido o expirado. Por favor, solicita un nuevo enlace de restablecimiento.');
     } finally {
       setLoading(false);
     }
@@ -102,42 +172,74 @@ const ResetPassword = () => {
         ) : (
           <>
             <p className="instruction-text">
-              Ingresa tu nueva contraseña a continuación.
+              Crea una nueva contraseña segura para tu cuenta.
             </p>
             
             {error && (
               <div className="error-alert">
-                {error}
+                <i className="fa fa-exclamation-circle"></i> {error}
               </div>
             )}
             
             <form onSubmit={handleSubmit} className="reset-password-form">
               <div className="form-group">
                 <label htmlFor="password">Nueva contraseña</label>
-                <input
-                  type="password"
-                  id="password"
-                  name="password"
-                  value={formData.password}
-                  onChange={handleChange}
-                  placeholder="Ingresa tu nueva contraseña"
-                  minLength="8"
-                  required
-                />
-                <p className="password-hint">La contraseña debe tener al menos 8 caracteres.</p>
+                <div className="password-input-container">
+                  <input
+                    type={showPassword ? "text" : "password"}
+                    id="password"
+                    name="password"
+                    value={formData.password}
+                    onChange={handleChange}
+                    placeholder="Ingresa tu nueva contraseña"
+                    minLength="8"
+                    required
+                  />
+                  <button
+                    type="button"
+                    className="toggle-password-btn"
+                    onClick={togglePasswordVisibility}
+                    tabIndex="-1"
+                  >
+                    <i className={`fa ${showPassword ? 'fa-eye-slash' : 'fa-eye'}`}></i>
+                  </button>
+                </div>
+                
+                {formData.password && (
+                  <div className="password-strength">
+                    <div className="strength-bar-container">
+                      <div 
+                        className="strength-bar" 
+                        style={{
+                          width: `${(passwordStrength.score / 5) * 100}%`,
+                          backgroundColor: passwordStrength.color
+                        }}
+                      ></div>
+                    </div>
+                    <span className="strength-text" style={{ color: passwordStrength.color }}>
+                      {passwordStrength.message}
+                    </span>
+                  </div>
+                )}
+                
+                <p className="password-hint">
+                  Tu contraseña debe tener al menos 8 caracteres e incluir letras mayúsculas, minúsculas, números y caracteres especiales.
+                </p>
               </div>
               
               <div className="form-group">
                 <label htmlFor="confirmPassword">Confirmar contraseña</label>
-                <input
-                  type="password"
-                  id="confirmPassword"
-                  name="confirmPassword"
-                  value={formData.confirmPassword}
-                  onChange={handleChange}
-                  placeholder="Confirma tu nueva contraseña"
-                  required
-                />
+                <div className="password-input-container">
+                  <input
+                    type={showPassword ? "text" : "password"}
+                    id="confirmPassword"
+                    name="confirmPassword"
+                    value={formData.confirmPassword}
+                    onChange={handleChange}
+                    placeholder="Confirma tu nueva contraseña"
+                    required
+                  />
+                </div>
               </div>
               
               <button
@@ -145,7 +247,13 @@ const ResetPassword = () => {
                 className="submit-btn"
                 disabled={loading}
               >
-                {loading ? 'Procesando...' : 'Restablecer contraseña'}
+                {loading ? (
+                  <>
+                    <span className="spinner"></span> Procesando...
+                  </>
+                ) : (
+                  'Restablecer contraseña'
+                )}
               </button>
             </form>
           </>

@@ -1,12 +1,20 @@
 import React, { useState } from 'react';
-import { useAuth } from '../../context/AuthContext';
+import useAuth from '../../hooks/useAuth';
 import './MFAVerify.css';
 
+/**
+ * Componente para verificación MFA durante el inicio de sesión
+ * Ubicación: /src/Components/MFAVerify/MFAVerify.jsx
+ * 
+ * @param {Object} props - Propiedades del componente
+ * @param {Function} props.onVerified - Función a ejecutar cuando la verificación es exitosa
+ * @returns {JSX.Element} Componente de verificación MFA
+ */
 const MFAVerify = ({ onVerified }) => {
   const [token, setToken] = useState('');
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
-  const { validateMFA } = useAuth();
+  const { validateMFA, mfaUsername } = useAuth();
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -18,13 +26,25 @@ const MFAVerify = ({ onVerified }) => {
     
     try {
       setLoading(true);
-      await validateMFA(token);
+      
+      // Asegurarse de pasar tanto el username como el token
+      await validateMFA(mfaUsername, token);
+      
       if (onVerified) onVerified();
     } catch (err) {
       setError(err.message || 'Código inválido');
     } finally {
       setLoading(false);
     }
+  };
+
+  const handleTokenChange = (e) => {
+    // Solo permitir dígitos y limitar a 6 caracteres
+    const value = e.target.value.replace(/\D/g, '').slice(0, 6);
+    setToken(value);
+    
+    // Limpiar mensaje de error cuando el usuario comienza a escribir
+    if (error) setError('');
   };
 
   return (
@@ -41,14 +61,12 @@ const MFAVerify = ({ onVerified }) => {
             type="text"
             id="token"
             value={token}
-            onChange={(e) => {
-              setToken(e.target.value.replace(/\D/g, ''));
-              setError('');
-            }}
+            onChange={handleTokenChange}
             placeholder="000000"
             maxLength="6"
             autoFocus
           />
+          <p className="field-hint">Ingresa el código de 6 dígitos de tu aplicación autenticadora</p>
         </div>
         
         <button 
@@ -57,7 +75,7 @@ const MFAVerify = ({ onVerified }) => {
           disabled={loading}
         >
           {loading ? 'Verificando...' : 'Verificar'}
-          </button>
+        </button>
       </form>
       
       <div className="mfa-help">

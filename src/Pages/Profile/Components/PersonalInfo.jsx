@@ -92,16 +92,6 @@ const PersonalInfo = ({ user, updateProfile }) => {
               required
             />
           </div>
-          <div className="form-group">
-            <label htmlFor="phone">Teléfono</label>
-            <input
-              type="tel"
-              id="phone"
-              name="phone"
-              value={formData.phone}
-              onChange={handleInputChange}
-            />
-          </div>
           <div className="form-actions">
             <button type="submit" className="save-btn">
               Guardar cambios
@@ -120,10 +110,6 @@ const PersonalInfo = ({ user, updateProfile }) => {
           <div className="info-row">
             <div className="info-label">Correo electrónico</div>
             <div className="info-value">{user.email}</div>
-          </div>
-          <div className="info-row">
-            <div className="info-label">Teléfono</div>
-            <div className="info-value">{user.phone || 'No especificado'}</div>
           </div>
         </div>
       )}

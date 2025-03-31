@@ -7,8 +7,8 @@ import Login from './Pages/Login/Login';
 import Register from './Pages/Register/Register';
 import ForgotPassword from './Pages/ForgotPassword/ForgotPassword';
 import ResetPassword from './Pages/ResetPassword/ResetPassword';
-import Logout from './Components/Logout';
-import ProtectedRoute from './Components/ProtectedRoute';
+import Logout from './Components/Logout'; // Ruta correcta
+import ProtectedRoute from './Components/ProtectedRoute'; // Ruta correcta
 
 // Páginas principales
 import MainLayout from './Layouts/MainLayout';
@@ -24,6 +24,10 @@ import Error from './Pages/Error/Error';
 import Checkout from './Pages/Checkout/Checkout';
 import OrderSuccess from './Pages/OrderSuccess/OrderSuccess';
 
+/**
+ * Componente principal de la aplicación
+ * Define las rutas y la estructura general
+ */
 function App() {
   return (
     <Router>

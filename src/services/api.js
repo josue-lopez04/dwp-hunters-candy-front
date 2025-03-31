@@ -1,4 +1,4 @@
-// src/services/api.js
+// src/services/api.js (Versión modificada)
 import axios from 'axios';
 
 // URL base para todas las peticiones API
@@ -9,7 +9,9 @@ const api = axios.create({
   baseURL: API_URL,
   headers: {
     'Content-Type': 'application/json'
-  }
+  },
+  // Para CORS
+  withCredentials: true
 });
 
 // Interceptor para añadir el token a las peticiones autenticadas

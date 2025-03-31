@@ -5,15 +5,28 @@ import authService from '../../services/auth.service';
 
 const ForgotPassword = () => {
   const [email, setEmail] = useState('');
+  const [step, setStep] = useState(1); // 1: formulario inicial, 2: confirmación enviada
   const [error, setError] = useState('');
-  const [success, setSuccess] = useState(false);
   const [loading, setLoading] = useState(false);
+  const [successMessage, setSuccessMessage] = useState('');
+
+  const validateEmail = (email) => {
+    const re = /^(([^<>()[\]\\.,;:\s@"]+(\.[^<>()[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/;
+    return re.test(String(email).toLowerCase());
+  };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     
+    // Validar que se ingresó un email
     if (!email) {
       setError('Por favor ingrese su correo electrónico');
+      return;
+    }
+
+    // Validar formato de email
+    if (!validateEmail(email)) {
+      setError('Por favor ingrese un correo electrónico válido');
       return;
     }
     
@@ -21,10 +34,13 @@ const ForgotPassword = () => {
       setLoading(true);
       setError('');
       
-      await authService.forgotPassword(email);
-      setSuccess(true);
+      // Llamar al servicio de recuperación de contraseña
+      const response = await authService.forgotPassword(email);
+      
+      setSuccessMessage('Se ha enviado un correo electrónico con instrucciones para restablecer tu contraseña.');
+      setStep(2); // Avanzar al siguiente paso
     } catch (err) {
-      setError(err.message || 'Error al enviar correo de recuperación');
+      setError(err.message || 'Error al enviar correo de recuperación. Por favor, inténtelo más tarde.');
     } finally {
       setLoading(false);
     }
@@ -39,19 +55,7 @@ const ForgotPassword = () => {
         
         <h1>Recuperación de contraseña</h1>
         
-        {success ? (
-          <div className="success-message">
-            <div className="success-icon">
-              <i className="fa fa-check-circle"></i>
-            </div>
-            <h2>¡Correo enviado!</h2>
-            <p>Se ha enviado un correo electrónico con instrucciones para restablecer tu contraseña a la dirección {email}.</p>
-            <p>Si no recibes el correo en los próximos minutos, revisa tu carpeta de spam.</p>
-            <Link to="/login" className="back-to-login-btn">
-              Volver al inicio de sesión
-            </Link>
-          </div>
-        ) : (
+        {step === 1 ? (
           <>
             <p className="instruction-text">
               Ingresa el correo electrónico asociado a tu cuenta y te enviaremos instrucciones para restablecer tu contraseña.
@@ -59,7 +63,7 @@ const ForgotPassword = () => {
             
             {error && (
               <div className="error-alert">
-                {error}
+                <i className="fa fa-exclamation-circle"></i> {error}
               </div>
             )}
             
@@ -70,8 +74,12 @@ const ForgotPassword = () => {
                   type="email"
                   id="email"
                   value={email}
-                  onChange={(e) => setEmail(e.target.value)}
+                  onChange={(e) => {
+                    setEmail(e.target.value);
+                    setError(''); // Limpiar error al escribir
+                  }}
                   placeholder="tucorreo@ejemplo.com"
+                  disabled={loading}
                   required
                 />
               </div>
@@ -81,7 +89,13 @@ const ForgotPassword = () => {
                 className="submit-btn"
                 disabled={loading}
               >
-                {loading ? 'Enviando...' : 'Enviar instrucciones'}
+                {loading ? (
+                  <>
+                    <span className="spinner"></span> Enviando...
+                  </>
+                ) : (
+                  'Enviar instrucciones'
+                )}
               </button>
             </form>
             
@@ -89,6 +103,33 @@ const ForgotPassword = () => {
               <Link to="/login">Volver al inicio de sesión</Link>
             </div>
           </>
+        ) : (
+          <div className="success-message">
+            <div className="success-icon">
+              <i className="fa fa-check-circle"></i>
+            </div>
+            <h2>¡Correo enviado!</h2>
+            <p>{successMessage}</p>
+            <p>Si no recibes el correo en los próximos minutos, revisa tu carpeta de spam o solicita un nuevo enlace.</p>
+            
+            <div className="email-info">
+              <div className="email-sent-to">
+                <span className="label">Correo enviado a:</span>
+                <span className="value">{email}</span>
+              </div>
+            </div>
+            
+            <button 
+              className="resend-btn"
+              onClick={() => setStep(1)}
+            >
+              <i className="fa fa-envelope"></i> Solicitar nuevo enlace
+            </button>
+            
+            <Link to="/login" className="back-to-login-btn">
+              Volver al inicio de sesión
+            </Link>
+          </div>
         )}
       </div>
     </div>

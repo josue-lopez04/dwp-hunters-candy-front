@@ -1,9 +1,18 @@
 // src/context/SocketContext.js
 import React, { createContext, useContext, useEffect, useState } from 'react';
 import { io } from 'socket.io-client';
-import { useAuth } from './AuthContext';
+import { useAuth } from './AuthContext'; // Ahora funciona porque hemos exportado useAuth de AuthContext
 
 const SocketContext = createContext();
+
+// Hook personalizado para usar el contexto de Socket
+export const useSocket = () => {
+  const context = useContext(SocketContext);
+  if (!context) {
+    throw new Error('useSocket debe ser utilizado dentro de un SocketProvider');
+  }
+  return context;
+};
 
 export const SocketProvider = ({ children }) => {
   const [socket, setSocket] = useState(null);
@@ -160,7 +169,5 @@ export const SocketProvider = ({ children }) => {
     </SocketContext.Provider>
   );
 };
-
-export const useSocket = () => useContext(SocketContext);
 
 export default SocketContext;

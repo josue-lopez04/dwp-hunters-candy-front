@@ -1,8 +1,17 @@
-import React, { createContext, useContext, useState, useEffect } from 'react';
+import React, { createContext, useState, useEffect, useContext } from 'react';
 import authService from '../services/auth.service';
 
-// Crear el contexto de autenticación fuera del AuthProvider
+// Crear el contexto de autenticación
 const AuthContext = createContext(); 
+
+// Hook personalizado para usar el contexto de autenticación
+export const useAuth = () => {
+  const context = useContext(AuthContext);
+  if (!context) {
+    throw new Error('useAuth debe ser utilizado dentro de un AuthProvider');
+  }
+  return context;
+};
 
 // Crear el proveedor del contexto
 export const AuthProvider = ({ children }) => {
@@ -26,6 +35,7 @@ export const AuthProvider = ({ children }) => {
     checkAuthentication();
   }, []);
 
+  // Función de login
   const login = async (username, password) => {
     try {
       const userData = await authService.login(username, password);
@@ -44,9 +54,10 @@ export const AuthProvider = ({ children }) => {
     }
   };
 
-  const validateMFA = async (token) => {
+  // Función para validar MFA durante el login
+  const validateMFA = async (username, token) => {
     try {
-      const userData = await authService.validateMFA(mfaUsername, token);
+      const userData = await authService.validateMFA(username || mfaUsername, token);
       setUser(userData);
       setIsAuthenticated(true);
       setRequireMFA(false);
@@ -57,6 +68,7 @@ export const AuthProvider = ({ children }) => {
     }
   };
 
+  // Configurar MFA
   const setupMFA = async () => {
     try {
       return await authService.setupMFA();
@@ -65,63 +77,62 @@ export const AuthProvider = ({ children }) => {
     }
   };
 
-// En AuthContext.js
-const verifyAndEnableMFA = async (token) => {
-  try {
-    const response = await authService.verifyAndEnableMFA(token);
-    
-    // Actualizar el estado del usuario localmente después de activar MFA
-    setUser(prevUser => ({
-      ...prevUser,
-      mfaEnabled: true
-    }));
-    
-    // También actualizar el usuario en localStorage
-    const storedUser = JSON.parse(localStorage.getItem('user') || '{}');
-    localStorage.setItem('user', JSON.stringify({
-      ...storedUser,
-      mfaEnabled: true
-    }));
-    
-    return response;
-  } catch (error) {
-    throw error;
-  }
-};
-
-  const disableMFA = async (token, password) => {
+  // Verificar y activar MFA
+  const verifyAndEnableMFA = async (token) => {
     try {
-      return await authService.disableMFA(token, password);
+      const response = await authService.verifyAndEnableMFA(token);
+      
+      // Actualizar el estado del usuario localmente después de activar MFA
+      setUser(prevUser => ({
+        ...prevUser,
+        mfaEnabled: true
+      }));
+      
+      return response;
     } catch (error) {
       throw error;
     }
   };
 
+  // Desactivar MFA
+  const disableMFA = async (token, password) => {
+    try {
+      const response = await authService.disableMFA(token, password);
+      
+      // Actualizar el estado del usuario localmente después de desactivar MFA
+      setUser(prevUser => ({
+        ...prevUser,
+        mfaEnabled: false
+      }));
+      
+      return response;
+    } catch (error) {
+      throw error;
+    }
+  };
+
+  // Registrar usuario
   const register = async (userData) => {
     try {
-      const formattedUserData = {
-        ...userData,
-        firstName: userData.firstName || '',
-        lastName: userData.lastName || '',
-        phone: userData.phone || ''
-      };
-
-      const newUser = await authService.register(formattedUserData);
+      const newUser = await authService.register(userData);
       setUser(newUser);
       setIsAuthenticated(true);
       return newUser;
     } catch (error) {
-      console.error('Error en el registro:', error);
       throw error;
     }
   };
 
+  // Cerrar sesión
   const logout = () => {
     authService.logout();
     setUser(null);
     setIsAuthenticated(false);
+    setRequireMFA(false);
+    setMfaUsername('');
   };
 
+  // Actualizar perfil de usuario
   const updateProfile = async (userData) => {
     try {
       const updatedUser = await authService.updateUserProfile(userData);
@@ -132,6 +143,25 @@ const verifyAndEnableMFA = async (token) => {
     }
   };
 
+  // Recuperar contraseña
+  const forgotPassword = async (email) => {
+    try {
+      return await authService.forgotPassword(email);
+    } catch (error) {
+      throw error;
+    }
+  };
+
+  // Restablecer contraseña
+  const resetPassword = async (token, password) => {
+    try {
+      return await authService.resetPassword(token, password);
+    } catch (error) {
+      throw error;
+    }
+  };
+
+  // Valor del contexto que será proporcionado
   const value = {
     user,
     loading,
@@ -145,18 +175,12 @@ const verifyAndEnableMFA = async (token) => {
     updateProfile,
     setupMFA,
     verifyAndEnableMFA,
-    disableMFA
+    disableMFA,
+    forgotPassword,
+    resetPassword
   };
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
-};
-
-export const useAuth = () => {
-  const context = useContext(AuthContext);
-  if (context === undefined) {
-    throw new Error('useAuth debe ser utilizado dentro de un AuthProvider');
-  }
-  return context;
 };
 
 export default AuthContext;

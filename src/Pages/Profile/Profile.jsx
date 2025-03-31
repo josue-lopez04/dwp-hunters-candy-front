@@ -127,7 +127,7 @@ const Profile = () => {
       <div className="profile-container">
         <div className="profile-header">
           <div className="profile-avatar">
-            <img src={user.avatar || 'https://via.placeholder.com/100'} alt={`${user.firstName} ${user.lastName}`} />
+            <img src={user.avatar || 'profile.webp'} alt={`${user.firstName} ${user.lastName}`} />
           </div>
           <div className="profile-title">
             <h1>{user.firstName} {user.lastName}</h1>
@@ -165,13 +165,6 @@ const Profile = () => {
               >
                 <i className="fa fa-shield-alt"></i>
                 Seguridad
-              </button>
-              <button
-                className={`menu-item ${activeTab === 'password' ? 'active' : ''}`}
-                onClick={() => setActiveTab('password')}
-              >
-                <i className="fa fa-lock"></i>
-                Cambiar contraseña
               </button>
             </div>
           </div>
@@ -214,9 +207,7 @@ const Profile = () => {
               <div className="profile-tab addresses-tab">
                 <div className="tab-header">
                   <h2>Mis direcciones</h2>
-                  <button className="add-btn">
-                    <i className="fa fa-plus"></i> Añadir nueva
-                  </button>
+
                 </div>
 
                 {addresses.length === 0 ? (

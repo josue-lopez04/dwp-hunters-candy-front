@@ -16,6 +16,25 @@ const transporter = nodemailer.createTransport({
 });
 
 /**
+ * Obtiene la URL base para los enlaces en emails
+ * @returns {string} URL base (frontend)
+ */
+const getBaseUrl = () => {
+  // Priorizar variable de entorno
+  if (process.env.FRONTEND_URL) {
+    return process.env.FRONTEND_URL;
+  }
+  
+  // Si estamos en producción, usar la URL de Vercel
+  if (process.env.NODE_ENV === 'production') {
+    return 'https://dwp-hunters-candy.vercel.app';
+  }
+  
+  // En desarrollo, usar localhost
+  return 'http://localhost:3000';
+};
+
+/**
  * Envía un correo de recuperación de contraseña
  * @param {string} to - Email del destinatario
  * @param {string} token - Token de recuperación
@@ -24,8 +43,13 @@ const transporter = nodemailer.createTransport({
  */
 export const sendPasswordResetEmail = async (to, token, username) => {
   try {
-    // Construir URL de reset (frontend)
-    const resetUrl = `${process.env.FRONTEND_URL || 'http://localhost:3000'}/reset-password/${token}`;
+    // Obtener la URL base correcta según entorno
+    const baseUrl = getBaseUrl();
+    
+    // Construir URL de reset
+    const resetUrl = `${baseUrl}/reset-password/${token}`;
+    
+    console.log(`Enviando correo de recuperación con URL: ${resetUrl}`);
     
     // Template del correo
     const mailOptions = {
@@ -88,6 +112,9 @@ export const sendPasswordResetEmail = async (to, token, username) => {
  */
 export const sendPasswordChangedEmail = async (to, username) => {
   try {
+    const baseUrl = getBaseUrl();
+    const loginUrl = `${baseUrl}/login`;
+    
     const mailOptions = {
       from: '"Hunter\'s Candy" <josuelopezhernandez112@gmail.com>',
       to,
@@ -105,7 +132,7 @@ export const sendPasswordChangedEmail = async (to, username) => {
           <p style="color: #4b5563; margin-bottom: 20px;">Tu contraseña ha sido actualizada exitosamente. Ya puedes iniciar sesión con tu nueva contraseña.</p>
           
           <div style="text-align: center; margin: 30px 0;">
-            <a href="${process.env.FRONTEND_URL || 'http://localhost:3000'}/login" style="background-color: #4f46e5; color: white; padding: 12px 24px; text-decoration: none; border-radius: 6px; font-weight: bold; display: inline-block;">Iniciar sesión</a>
+            <a href="${loginUrl}" style="background-color: #4f46e5; color: white; padding: 12px 24px; text-decoration: none; border-radius: 6px; font-weight: bold; display: inline-block;">Iniciar sesión</a>
           </div>
           
           <p style="color: #4b5563; margin-bottom: 20px;">Si no realizaste este cambio, por favor contacta inmediatamente con nuestro equipo de soporte.</p>

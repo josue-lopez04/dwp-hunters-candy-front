@@ -21,13 +21,16 @@ const ResetPassword = () => {
   const [success, setSuccess] = useState(false);
   const [validToken, setValidToken] = useState(true);
   const [showPassword, setShowPassword] = useState(false);
+  const [debugInfo, setDebugInfo] = useState(`Token recibido: ${token}`);
 
   // Verificar token al cargar
   useEffect(() => {
     if (!token) {
       setValidToken(false);
+      setDebugInfo('Error: No se proporcionó token');
+    } else {
+      setDebugInfo(`Token recibido: ${token}`);
     }
-    // También podríamos verificar el token con el backend aquí
   }, [token]);
 
   const handleChange = (e) => {
@@ -102,6 +105,8 @@ const ResetPassword = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     
+    setDebugInfo(prevInfo => `${prevInfo}\nIntentando resetear contraseña...`);
+    
     // Validación de contraseñas
     if (formData.password !== formData.confirmPassword) {
       setError('Las contraseñas no coinciden');
@@ -120,10 +125,16 @@ const ResetPassword = () => {
     
     try {
       setLoading(true);
-      await authService.resetPassword(token, formData.password);
+      setDebugInfo(prevInfo => `${prevInfo}\nEnviando petición con token: ${token}`);
+      
+      const response = await authService.resetPassword(token, formData.password);
+      
+      setDebugInfo(prevInfo => `${prevInfo}\nRespuesta recibida: ${JSON.stringify(response)}`);
       setSuccess(true);
     } catch (error) {
-      setError(error.message || 'Token inválido o expirado. Por favor, solicita un nuevo enlace de restablecimiento.');
+      const errorMsg = error.message || 'Token inválido o expirado. Por favor, solicita un nuevo enlace de restablecimiento.';
+      setError(errorMsg);
+      setDebugInfo(prevInfo => `${prevInfo}\nError: ${errorMsg}`);
     } finally {
       setLoading(false);
     }
@@ -140,6 +151,10 @@ const ResetPassword = () => {
             </div>
             <h2>Enlace inválido</h2>
             <p>El enlace para restablecer la contraseña no es válido o ha expirado.</p>
+            <div className="debug-info">
+              <p>Información de depuración:</p>
+              <pre>{debugInfo}</pre>
+            </div>
             <Link to="/forgot-password" className="try-again-btn">
               Solicitar un nuevo enlace
             </Link>
@@ -256,6 +271,11 @@ const ResetPassword = () => {
                 )}
               </button>
             </form>
+            
+            <div className="debug-info">
+              <p>Información de depuración:</p>
+              <pre>{debugInfo}</pre>
+            </div>
           </>
         )}
       </div>

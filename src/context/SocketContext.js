@@ -52,8 +52,6 @@ export const SocketProvider = ({ children }) => {
     }
 
     try {
-      // Usar WebSocket nativo en lugar de Socket.io
-      // Para desarrollo usamos ws:// y para producción wss://
       const isDevelopment = process.env.NODE_ENV === 'development';
       const SOCKET_URL = isDevelopment 
         ? 'ws://localhost:5000/ws'  // URL para desarrollo

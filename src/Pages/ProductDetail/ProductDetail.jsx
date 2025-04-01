@@ -12,7 +12,6 @@ const ProductDetail = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
   const [quantity, setQuantity] = useState(1);
-  const [activeTab, setActiveTab] = useState('description');
 
   useEffect(() => {
     const fetchProductDetails = async () => {
@@ -160,8 +159,9 @@ const ProductDetail = () => {
               </button>
             </div>
 
-            <div className="product-short-description">
-              <p>{product.description && product.description.substring(0, 150)}...</p>
+            <div className="product-description">
+              <h3>Descripción del producto</h3>
+              <p>{product.description}</p>
             </div>
 
             <div className="product-meta">
@@ -173,108 +173,6 @@ const ProductDetail = () => {
                 <Link to={`/inventory?category=${product.category}`}>{product.category}</Link>
               </div>
             </div>
-          </div>
-        </div>
-
-        <div className="product-detail-tabs">
-          <div className="tabs-header">
-            <button
-              className={`tab-btn ${activeTab === 'description' ? 'active' : ''}`}
-              onClick={() => setActiveTab('description')}
-            >
-              Descripción
-            </button>
-            <button
-              className={`tab-btn ${activeTab === 'specifications' ? 'active' : ''}`}
-              onClick={() => setActiveTab('specifications')}
-            >
-              Especificaciones
-            </button>
-            <button
-              className={`tab-btn ${activeTab === 'reviews' ? 'active' : ''}`}
-              onClick={() => setActiveTab('reviews')}
-            >
-              Reseñas ({product.reviews ? product.reviews.length : 0})
-            </button>
-          </div>
-
-          <div className="tabs-content">
-            {activeTab === 'description' && (
-              <div className="tab-content description-content">
-                <p>{product.description}</p>
-                <p>Este producto está diseñado para cazadores profesionales y aficionados que buscan alta precisión y fiabilidad en sus expediciones de caza. Fabricado con los mejores materiales y sometido a rigurosas pruebas de calidad para garantizar su rendimiento en las condiciones más exigentes.</p>
-                <p>Incluye una garantía de 5 años del fabricante contra defectos de fabricación.</p>
-              </div>
-            )}
-
-            {activeTab === 'specifications' && (
-              <div className="tab-content specifications-content">
-                <table className="specs-table">
-                  <tbody>
-                    {product.specifications && Object.entries(product.specifications).map(([key, value]) => (
-                      <tr key={key}>
-                        <th>{key.charAt(0).toUpperCase() + key.slice(1)}</th>
-                        <td>{value}</td>
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
-              </div>
-            )}
-
-            {activeTab === 'reviews' && (
-              <div className="tab-content reviews-content">
-                <div className="reviews-list">
-                  {product.reviews && product.reviews.length > 0 ? (
-                    product.reviews.map(review => (
-                      <div key={review._id} className="review-item">
-                        <div className="review-header">
-                          <span className="review-author">{review.userName || 'Usuario'}</span>
-                          <div className="review-rating">
-                            {[...Array(5)].map((_, i) => (
-                              <i
-                                key={i}
-                                className={`fa fa-star ${i < review.rating ? 'filled' : ''}`}
-                              ></i>
-                            ))}
-                          </div>
-                          <span className="review-date">
-                            {new Date(review.createdAt).toLocaleDateString()}
-                          </span>
-                        </div>
-                        <div className="review-content">
-                          <p>{review.comment}</p>
-                        </div>
-                      </div>
-                    ))
-                  ) : (
-                    <p>No hay reseñas para este producto todavía.</p>
-                  )}
-                </div>
-
-                <div className="write-review">
-                  <h3>Deja tu opinión</h3>
-                  <form className="review-form">
-                    <div className="rating-selector">
-                      <span>Tu valoración:</span>
-                      <div className="stars">
-                        {[...Array(5)].map((_, i) => (
-                          <i key={i} className="fa fa-star"></i>
-                        ))}
-                      </div>
-                    </div>
-                    <textarea
-                      className="review-comment"
-                      placeholder="Escribe tu opinión sobre este producto..."
-                      rows="4"
-                    ></textarea>
-                    <button type="submit" className="submit-review-btn">
-                      Enviar reseña
-                    </button>
-                  </form>
-                </div>
-              </div>
-            )}
           </div>
         </div>
 

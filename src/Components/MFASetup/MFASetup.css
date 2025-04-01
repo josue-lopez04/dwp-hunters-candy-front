@@ -1,225 +1,217 @@
+/* MFASetup.css - Estilos mejorados para el componente */
 .mfa-setup-container {
   max-width: 600px;
   margin: 0 auto;
-  padding: 2rem;
-  background-color: white;
+  padding: 20px;
+  background-color: #fff;
   border-radius: 8px;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
 }
 
 .mfa-setup-container h2 {
-  margin-top: 0;
-  margin-bottom: 1.5rem;
-  color: #111827;
-  font-size: 1.5rem;
-  font-weight: 600;
   text-align: center;
-}
-
-.mfa-setup-container h3 {
-  margin-top: 0;
-  margin-bottom: 1rem;
+  margin-bottom: 20px;
   color: #1f2937;
-  font-size: 1.25rem;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
   font-weight: 600;
 }
 
-.mfa-setup-container h4 {
-  margin: 1rem 0 0.5rem;
-  color: #374151;
-  font-size: 1rem;
-  font-weight: 600;
-}
-
-.mfa-setup-container p {
-  color: #4b5563;
-  margin-bottom: 1rem;
-  line-height: 1.5;
-}
-
+/* Estilos para la barra de progreso */
 .progress-bar {
   display: flex;
-  align-items: center;
   justify-content: center;
-  margin-bottom: 2rem;
+  align-items: center;
+  margin-bottom: 30px;
 }
 
 .progress-step {
-  width: 32px;
-  height: 32px;
+  width: 30px;
+  height: 30px;
   border-radius: 50%;
   background-color: #e5e7eb;
   color: #6b7280;
   display: flex;
-  align-items: center;
   justify-content: center;
+  align-items: center;
   font-weight: 600;
+  font-size: 14px;
 }
 
 .progress-step.active {
-  background-color: #4f46e5;
+  background-color: #3b82f6;
   color: white;
 }
 
 .progress-line {
-  height: 2px;
-  width: 60px;
+  flex: 1;
+  height: 3px;
   background-color: #e5e7eb;
-  margin: 0 8px;
+  max-width: 80px;
 }
 
-.progress-step.active + .progress-line {
-  background-color: #4f46e5;
+.progress-line.active {
+  background-color: #3b82f6;
 }
 
+/* Estilos para los pasos */
 .setup-step {
-  margin-bottom: 1.5rem;
+  margin-bottom: 20px;
 }
 
+.setup-step h3 {
+  margin-bottom: 15px;
+  color: #1f2937;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+  font-weight: 600;
+}
+
+.instruction-text {
+  margin-bottom: 20px;
+  color: #4b5563;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+}
+
+/* Estilos para las aplicaciones autenticadoras */
 .authenticator-apps {
   display: flex;
   flex-wrap: wrap;
-  gap: 1rem;
-  margin: 1.5rem 0;
+  gap: 15px;
+  margin-bottom: 20px;
 }
 
 .authenticator-app {
+  flex: 1;
+  min-width: 120px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 15px;
+  border: 1px solid #e5e7eb;
+  border-radius: 8px;
+  background-color: #f9fafb;
+}
+
+.authenticator-app i {
+  font-size: 24px;
+  margin-bottom: 10px;
+  color: #4b5563;
+}
+
+/* Estilo para el contenedor del código QR */
+.qr-code-container {
+  display: flex;
+  justify-content: center;
+  margin: 20px 0;
+}
+
+.qr-code-container img {
+  max-width: 200px;
+  border: 1px solid #e5e7eb;
+  padding: 10px;
+  background-color: white;
+}
+
+.qr-error {
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  padding: 1rem;
-  background-color: #f9fafb;
-  border-radius: 8px;
-  width: calc(33.333% - 0.667rem);
-  transition: all 0.2s ease;
-}
-
-.authenticator-app:hover {
-  background-color: #f3f4f6;
-  transform: translateY(-2px);
-}
-
-.authenticator-app i {
-  font-size: 2rem;
-  margin-bottom: 0.5rem;
-  color: #4f46e5;
-}
-
-.authenticator-app span {
-  font-size: 0.875rem;
-  text-align: center;
-  color: #374151;
-}
-
-.qr-code-container {
-  display: flex;
-  justify-content: center;
-  margin: 1.5rem 0;
-}
-
-.qr-code-container img {
   width: 200px;
   height: 200px;
-  border-radius: 8px;
+  background-color: #f3f4f6;
   border: 1px solid #e5e7eb;
+  border-radius: 4px;
+  color: #ef4444;
 }
 
-.qr-error {
-  background-color: #fee2e2;
-  color: #b91c1c;
-  padding: 1rem;
-  border-radius: 8px;
-  text-align: center;
-}
-
+/* Estilos para la entrada manual */
 .manual-entry {
-  background-color: #f9fafb;
-  padding: 1rem;
+  background-color: #f3f4f6;
+  padding: 15px;
   border-radius: 8px;
-  margin-bottom: 1.5rem;
+  margin-bottom: 20px;
+}
+
+.manual-entry h4 {
+  margin-bottom: 10px;
+  font-weight: 600;
+  color: #374151;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
 }
 
 .secret-key {
-  background-color: #e5e7eb;
-  padding: 0.75rem;
-  border-radius: 6px;
   font-family: monospace;
-  font-size: 1rem;
-  letter-spacing: 0.1rem;
-  text-align: center;
-  color: #1f2937;
-  margin-top: 0.5rem;
-  user-select: all;
+  padding: 10px;
+  background-color: white;
+  border: 1px solid #e5e7eb;
+  border-radius: 4px;
+  margin-top: 8px;
+  font-size: 14px;
+  word-break: break-all;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
 }
 
+.copy-secret-btn {
+  background-color: transparent;
+  border: none;
+  color: #6b7280;
+  cursor: pointer;
+  padding: 5px;
+  margin-left: 10px;
+}
+
+.copy-secret-btn:hover {
+  color: #3b82f6;
+}
+
+/* Estilos para el formulario de verificación */
 .verify-form {
-  margin-top: 1.5rem;
+  margin-top: 20px;
 }
 
-.form-group {
-  margin-bottom: 1rem;
-}
-
-.form-group input {
-  width: 100%;
-  padding: 0.75rem 1rem;
-  font-size: 1.25rem;
+.verification-input {
+  font-family: monospace;
+  font-size: 24px;
+  letter-spacing: 4px;
   text-align: center;
-  letter-spacing: 0.25rem;
-  border: 1px solid #d1d5db;
-  border-radius: 6px;
-  transition: border-color 0.2s ease;
+  width: 100%;
+  padding: 10px;
+  border: 2px solid #e5e7eb;
+  border-radius: 8px;
+  max-width: 180px;
+  margin: 0 auto;
+  display: block;
 }
 
-.form-group input:focus {
+.verification-input:focus {
+  border-color: #3b82f6;
   outline: none;
-  border-color: #4f46e5;
-  box-shadow: 0 0 0 3px rgba(79, 70, 229, 0.1);
 }
 
 .field-hint {
-  font-size: 0.875rem;
+  font-size: 0.85rem;
   color: #6b7280;
-  margin-top: 0.5rem;
+  margin-top: 8px;
+  text-align: center;
 }
 
-.mfa-error {
-  background-color: #fee2e2;
-  color: #b91c1c;
-  padding: 0.75rem;
-  border-radius: 6px;
-  margin-bottom: 1rem;
-  font-size: 0.875rem;
-}
-
+/* Estilos para los botones de navegación */
 .step-actions {
   display: flex;
   justify-content: space-between;
-  margin-top: 1.5rem;
+  margin-top: 30px;
 }
 
-.next-button,
-.back-button,
-.verify-button {
-  padding: 0.75rem 1.5rem;
+.back-button, .next-button, .verify-button {
+  padding: 10px 20px;
   border-radius: 6px;
   font-weight: 500;
   cursor: pointer;
-  transition: all 0.2s ease;
-  display: inline-flex;
+  display: flex;
   align-items: center;
-  gap: 0.5rem;
-}
-
-.next-button {
-  background-color: #4f46e5;
-  color: white;
-  border: none;
-}
-
-.next-button:hover {
-  background-color: #4338ca;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
 }
 
 .back-button {
@@ -228,54 +220,86 @@
   border: 1px solid #d1d5db;
 }
 
-.back-button:hover {
-  background-color: #e5e7eb;
-}
-
-.verify-button {
-  background-color: #4f46e5;
+.next-button, .verify-button {
+  background-color: #3b82f6;
   color: white;
   border: none;
 }
 
-.verify-button:hover:not(:disabled) {
-  background-color: #4338ca;
+.back-button:hover {
+  background-color: #e5e7eb;
 }
 
-.verify-button:disabled {
-  opacity: 0.7;
-  cursor: not-allowed;
+.next-button:hover, .verify-button:hover {
+  background-color: #2563eb;
 }
 
+.back-button i, .next-button i {
+  margin: 0 5px;
+}
+
+/* Estilos para mensajes de error */
+.mfa-error {
+  background-color: #fee2e2;
+  color: #b91c1c;
+  padding: 12px;
+  border-radius: 6px;
+  margin: 20px 0;
+  display: flex;
+  align-items: center;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+}
+
+.mfa-error i {
+  margin-right: 10px;
+}
+
+.retry-btn {
+  margin-left: auto;
+  background-color: #b91c1c;
+  color: white;
+  border: none;
+  padding: 6px 12px;
+  border-radius: 4px;
+  cursor: pointer;
+}
+
+.retry-btn:hover {
+  background-color: #991b1b;
+}
+
+/* Estilos para el spinner de carga */
 .mfa-setup-loading {
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  padding: 3rem;
+  padding: 40px;
 }
 
 .spinner {
-  border: 3px solid rgba(0, 0, 0, 0.1);
-  border-top: 3px solid #4f46e5;
+  border: 4px solid rgba(0, 0, 0, 0.1);
+  border-left-color: #3b82f6;
   border-radius: 50%;
-  width: 30px;
-  height: 30px;
+  width: 40px;
+  height: 40px;
   animation: spin 1s linear infinite;
-  margin-bottom: 1rem;
+  margin-bottom: 20px;
+}
+
+.spinner-small {
+  border: 3px solid rgba(255, 255, 255, 0.3);
+  border-left-color: white;
+  border-radius: 50%;
+  width: 16px;
+  height: 16px;
+  animation: spin 1s linear infinite;
+  margin-right: 10px;
+  display: inline-block;
 }
 
 @keyframes spin {
-  0% { transform: rotate(0deg); }
-  100% { transform: rotate(360deg); }
-}
-
-@media (max-width: 640px) {
-  .authenticator-app {
-    width: 100%;
-  }
-  
-  .progress-line {
-    width: 40px;
+  to {
+    transform: rotate(360deg);
   }
 }

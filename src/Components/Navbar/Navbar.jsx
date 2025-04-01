@@ -1,9 +1,10 @@
 import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import './Navbar.css';
-import { useAuth } from '../../context/AuthContext'; // Import correcto
+import { useAuth } from '../../context/AuthContext';
 import { useCart } from '../../context/CartContext';
 import Notifications from '../Notifications/Notifications';
+import ConnectionStatus from '../ConnectionStatus/ConnectionStatus';
 
 const Navbar = () => {
   const [isOpen, setIsOpen] = useState(false);
@@ -58,6 +59,9 @@ const Navbar = () => {
               <span className="cart-badge">{cartItemCount}</span>
             )}
           </Link>
+        </li>
+        <li className="nav-item">
+          <ConnectionStatus />
         </li>
         <li className="nav-item">
           <Notifications />

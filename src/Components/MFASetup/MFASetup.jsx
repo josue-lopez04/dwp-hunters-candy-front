@@ -25,11 +25,19 @@ const MFASetup = ({ onSetupComplete }) => {
     const generateMFA = async () => {
       try {
         setLoading(true);
+        setError(''); // Limpiar errores anteriores
+        
         const response = await setupMFA();
+        
+        if (!response || !response.qrCodeUrl || !response.secret) {
+          throw new Error('Error al obtener los datos MFA del servidor');
+        }
+        
         setQrCode(response.qrCodeUrl);
         setSecret(response.secret);
       } catch (err) {
-        setError('Error al generar el código QR. Intente de nuevo.');
+        console.error('Error al generar MFA:', err);
+        setError('Error al generar el código QR. Por favor intente de nuevo más tarde.');
       } finally {
         setLoading(false);
       }
@@ -37,6 +45,23 @@ const MFASetup = ({ onSetupComplete }) => {
 
     generateMFA();
   }, [setupMFA]);
+
+  const handleRetryQRCode = async () => {
+    // Intentar generar el código QR nuevamente
+    try {
+      setLoading(true);
+      setError('');
+      
+      const response = await setupMFA();
+      setQrCode(response.qrCodeUrl);
+      setSecret(response.secret);
+      
+      setLoading(false);
+    } catch (err) {
+      setError('Error al regenerar el código QR. Intente de nuevo.');
+      setLoading(false);
+    }
+  };
 
   const handleVerify = async (e) => {
     e.preventDefault();
@@ -48,9 +73,13 @@ const MFASetup = ({ onSetupComplete }) => {
     
     try {
       setVerifying(true);
+      setError(''); // Limpiar errores anteriores
+      
       await verifyAndEnableMFA(token);
+      
       if (onSetupComplete) onSetupComplete();
     } catch (err) {
+      console.error('Error al verificar MFA:', err);
       setError(err.message || 'Código inválido. Intente de nuevo.');
     } finally {
       setVerifying(false);
@@ -95,29 +124,43 @@ const MFASetup = ({ onSetupComplete }) => {
         <div className={`progress-step ${currentStep >= 3 ? 'active' : ''}`}>3</div>
       </div>
       
+      {error && (
+        <div className="mfa-error">
+          <i className="fas fa-exclamation-circle"></i>
+          {error}
+          {currentStep === 2 && (
+            <button onClick={handleRetryQRCode} className="retry-btn">
+              Reintentar
+            </button>
+          )}
+        </div>
+      )}
+      
       {currentStep === 1 && (
         <div className="setup-step">
           <h3>1. Instala una aplicación autenticadora</h3>
-          <p>Descarga e instala una de estas aplicaciones en tu dispositivo móvil:</p>
+          <p className="instruction-text">
+            Descarga e instala una de estas aplicaciones en tu dispositivo móvil:
+          </p>
           
           <div className="authenticator-apps">
             <div className="authenticator-app">
-              <i className="fa fa-google"></i>
+              <i className="fab fa-google"></i>
               <span>Google Authenticator</span>
             </div>
             <div className="authenticator-app">
-              <i className="fa fa-microsoft"></i>
+              <i className="fab fa-microsoft"></i>
               <span>Microsoft Authenticator</span>
             </div>
             <div className="authenticator-app">
-              <i className="fa fa-shield-alt"></i>
+              <i className="fas fa-shield-alt"></i>
               <span>Authy</span>
             </div>
           </div>
           
           <div className="step-actions">
             <button className="next-button" onClick={nextStep}>
-              Continuar <i className="fa fa-arrow-right"></i>
+              Continuar <i className="fas fa-arrow-right"></i>
             </button>
           </div>
         </div>
@@ -126,28 +169,48 @@ const MFASetup = ({ onSetupComplete }) => {
       {currentStep === 2 && (
         <div className="setup-step">
           <h3>2. Escanea el código QR</h3>
-          <p>Abre la aplicación autenticadora y escanea el siguiente código QR:</p>
+          <p className="instruction-text">
+            Abre la aplicación autenticadora y escanea el siguiente código QR:
+          </p>
           
           <div className="qr-code-container">
             {qrCode ? (
               <img src={qrCode} alt="Código QR para configuración MFA" />
             ) : (
-              <div className="qr-error">Error al cargar el código QR</div>
+              <div className="qr-error">
+                <p>Error al cargar el código QR</p>
+                <button onClick={handleRetryQRCode} className="retry-btn">
+                  Reintentar
+                </button>
+              </div>
             )}
           </div>
           
           <div className="manual-entry">
             <h4>¿No puedes escanear el código?</h4>
             <p>Ingresa este código manualmente en tu aplicación:</p>
-            <div className="secret-key">{secret}</div>
+            <div className="secret-key">
+              {secret ? secret : 'Error al cargar el código secreto'}
+              {secret && (
+                <button 
+                  className="copy-secret-btn"
+                  onClick={() => {
+                    navigator.clipboard.writeText(secret);
+                    alert('Código copiado al portapapeles');
+                  }}
+                >
+                  <i className="fas fa-copy"></i>
+                </button>
+              )}
+            </div>
           </div>
           
           <div className="step-actions">
             <button className="back-button" onClick={prevStep}>
-              <i className="fa fa-arrow-left"></i> Atrás
+              <i className="fas fa-arrow-left"></i> Atrás
             </button>
             <button className="next-button" onClick={nextStep}>
-              Continuar <i className="fa fa-arrow-right"></i>
+              Continuar <i className="fas fa-arrow-right"></i>
             </button>
           </div>
         </div>
@@ -156,9 +219,9 @@ const MFASetup = ({ onSetupComplete }) => {
       {currentStep === 3 && (
         <div className="setup-step">
           <h3>3. Ingresa el código de verificación</h3>
-          <p>Ingresa el código de 6 dígitos que aparece en tu aplicación autenticadora:</p>
-          
-          {error && <div className="mfa-error">{error}</div>}
+          <p className="instruction-text">
+            Ingresa el código de 6 dígitos que aparece en tu aplicación autenticadora:
+          </p>
           
           <form onSubmit={handleVerify} className="verify-form">
             <div className="form-group">
@@ -169,21 +232,30 @@ const MFASetup = ({ onSetupComplete }) => {
                 placeholder="000000"
                 maxLength="6"
                 autoFocus
+                className="verification-input"
               />
               <p className="field-hint">Este paso verifica que has configurado correctamente la autenticación de dos factores</p>
-              <p className="field-hint">Nota importante: si ves el mensaje "Código inválido. Inténtalo de nuevo." y ya lo intentastes varas veces, prueba borrando la cuenta en tu aplicacion de autenticación y escanea el codigo nuevamente</p>
+              <p className="field-hint">
+                Nota importante: si ves el mensaje "Código inválido. Inténtalo de nuevo." y ya lo has intentado varias veces, 
+                prueba borrando la cuenta en tu aplicación de autenticación y escanea el código nuevamente.
+              </p>
             </div>
             
             <div className="step-actions">
               <button className="back-button" onClick={prevStep}>
-                <i className="fa fa-arrow-left"></i> Atrás
+                <i className="fas fa-arrow-left"></i> Atrás
               </button>
               <button 
                 type="submit" 
                 className="verify-button"
                 disabled={verifying}
               >
-                {verifying ? 'Verificando...' : 'Verificar y activar'}
+                {verifying ? (
+                  <>
+                    <span className="spinner-small"></span>
+                    Verificando...
+                  </>
+                ) : 'Verificar y activar'}
               </button>
             </div>
           </form>

@@ -33,6 +33,20 @@ export const AuthProvider = ({ children }) => {
     };
 
     checkAuthentication();
+    
+    // Añadir evento para verificar el token caducado al cambiar a otra pestaña
+    const handleVisibilityChange = () => {
+      if (!document.hidden) {
+        checkAuthentication();
+      }
+    };
+
+    document.addEventListener('visibilitychange', handleVisibilityChange);
+    
+    // Limpiar el listener al desmontar
+    return () => {
+      document.removeEventListener('visibilitychange', handleVisibilityChange);
+    };
   }, []);
 
   // Función de login

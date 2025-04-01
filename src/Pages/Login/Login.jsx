@@ -71,8 +71,7 @@ const Login = () => {
     return (
       <div className="login-page">
         <div className="login-container">
-        <img src="/logo.jpeg" alt="Logo de HC" className="logo-img" />
-
+          <img src="/logo.jpeg" alt="Logo de HC" className="logo-img" />
           <MFAVerify onVerified={handleMFAVerified} />
         </div>
       </div>

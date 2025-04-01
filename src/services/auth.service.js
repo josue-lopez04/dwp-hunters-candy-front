@@ -20,6 +20,8 @@ const authService = {
         localStorage.setItem('token', response.data.token);
         localStorage.setItem('user', JSON.stringify(response.data));
         localStorage.setItem('isLoggedIn', 'true');
+        // Guardar timestamp de cuándo se generó el token
+        localStorage.setItem('tokenTimestamp', Date.now().toString());
       }
       
       return response.data;
@@ -41,6 +43,7 @@ const authService = {
         localStorage.setItem('token', mockUserData.token);
         localStorage.setItem('user', JSON.stringify(mockUserData));
         localStorage.setItem('isLoggedIn', 'true');
+        localStorage.setItem('tokenTimestamp', Date.now().toString());
         
         return mockUserData;
       }
@@ -52,18 +55,33 @@ const authService = {
   // Registrar usuario
   register: async (userData) => {
     try {
+      // Validar contraseña
+      if (userData.password) {
+        const passwordRegex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$/;
+        if (!passwordRegex.test(userData.password)) {
+          throw new Error('La contraseña debe tener al menos 8 caracteres, una letra mayúscula, una minúscula, un número y un carácter especial');
+        }
+      }
+      
       const response = await api.post('/users/register', userData);
       
       if (response.data.token) {
         localStorage.setItem('token', response.data.token);
         localStorage.setItem('user', JSON.stringify(response.data));
         localStorage.setItem('isLoggedIn', 'true');
+        localStorage.setItem('tokenTimestamp', Date.now().toString());
       }
       
       return response.data;
     } catch (error) {
       // Simulación para demo o desarrollo
       if (error.message === 'Network Error' || error.message.includes('CORS') || !isDevelopment) {
+        // Solo si la contraseña cumple con los requisitos
+        const passwordRegex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$/;
+        if (userData.password && !passwordRegex.test(userData.password)) {
+          throw new Error('La contraseña debe tener al menos 8 caracteres, una letra mayúscula, una minúscula, un número y un carácter especial');
+        }
+        
         const mockUserData = {
           _id: 'new-user-123',
           ...userData,
@@ -73,6 +91,7 @@ const authService = {
         localStorage.setItem('token', mockUserData.token);
         localStorage.setItem('user', JSON.stringify(mockUserData));
         localStorage.setItem('isLoggedIn', 'true');
+        localStorage.setItem('tokenTimestamp', Date.now().toString());
         
         return mockUserData;
       }
@@ -86,12 +105,29 @@ const authService = {
     localStorage.removeItem('token');
     localStorage.removeItem('user');
     localStorage.removeItem('isLoggedIn');
+    localStorage.removeItem('tokenTimestamp');
     localStorage.removeItem('cart');
   },
   
   // Verificar si el usuario está autenticado
   isAuthenticated: () => {
-    return localStorage.getItem('isLoggedIn') === 'true';
+    const isLoggedIn = localStorage.getItem('isLoggedIn') === 'true';
+    const tokenTimestamp = localStorage.getItem('tokenTimestamp');
+    
+    // Si hay un token, verificar si ha expirado (30 min = 1800000 ms)
+    if (isLoggedIn && tokenTimestamp) {
+      const now = Date.now();
+      const elapsed = now - parseInt(tokenTimestamp);
+      const tokenExpiration = 1800000; // 30 minutos en milisegundos
+      
+      if (elapsed > tokenExpiration) {
+        // Token expirado, limpiar info de login
+        authService.logout();
+        return false;
+      }
+    }
+    
+    return isLoggedIn;
   },
   
   // Obtener el usuario actual
@@ -189,32 +225,14 @@ const authService = {
     }
   },
   
-// Desactivar MFA
-disableMFA: async (token, password) => {
-  try {
-    // Debug para ver los datos enviados
-    console.log('Intentando desactivar MFA con:', { token, password });
-    
-    // Usar la ruta correcta para la API
-    const response = await api.post('/users/mfa/disable', { token, password });
-    
-    // Actualizar los datos en localStorage
-    const currentUser = authService.getCurrentUser();
-    if (currentUser) {
-      const updatedUser = {
-        ...currentUser,
-        mfaEnabled: false
-      };
-      localStorage.setItem('user', JSON.stringify(updatedUser));
-    }
-    
-    return response.data;
-  } catch (error) {
-    console.error('Error en disableMFA:', error);
-    
-    // Si estamos en modo desarrollo o simulación, desactivar MFA localmente
-    if (!isDevelopment || error.message === 'Network Error' || error.response?.status === 400) {
-      console.log('Simulando desactivación de MFA');
+  // Desactivar MFA
+  disableMFA: async (token, password) => {
+    try {
+      // Debug para ver los datos enviados
+      console.log('Intentando desactivar MFA con:', { token, password });
+      
+      // Usar la ruta correcta para la API
+      const response = await api.post('/users/mfa/disable', { token, password });
       
       // Actualizar los datos en localStorage
       const currentUser = authService.getCurrentUser();
@@ -226,17 +244,35 @@ disableMFA: async (token, password) => {
         localStorage.setItem('user', JSON.stringify(updatedUser));
       }
       
-      return { message: 'Autenticación de dos factores desactivada correctamente.' };
+      return response.data;
+    } catch (error) {
+      console.error('Error en disableMFA:', error);
+      
+      // Si estamos en modo desarrollo o simulación, desactivar MFA localmente
+      if (!isDevelopment || error.message === 'Network Error' || error.response?.status === 400) {
+        console.log('Simulando desactivación de MFA');
+        
+        // Actualizar los datos en localStorage
+        const currentUser = authService.getCurrentUser();
+        if (currentUser) {
+          const updatedUser = {
+            ...currentUser,
+            mfaEnabled: false
+          };
+          localStorage.setItem('user', JSON.stringify(updatedUser));
+        }
+        
+        return { message: 'Autenticación de dos factores desactivada correctamente.' };
+      }
+      
+      // Mensaje de error más específico basado en el error recibido
+      if (error.response?.status === 400) {
+        throw new Error('Datos inválidos. Asegúrate de proporcionar un código válido y tu contraseña actual.');
+      }
+      
+      throw error.response ? error.response.data : new Error('Error al desactivar autenticación de dos factores');
     }
-    
-    // Mensaje de error más específico basado en el error recibido
-    if (error.response?.status === 400) {
-      throw new Error('Datos inválidos. Asegúrate de proporcionar un código válido y tu contraseña actual.');
-    }
-    
-    throw error.response ? error.response.data : new Error('Error al desactivar autenticación de dos factores');
-  }
-},
+  },
   
   // Validar token MFA durante login
   validateMFA: async (username, token) => {
@@ -249,6 +285,7 @@ disableMFA: async (token, password) => {
         localStorage.setItem('token', response.data.token);
         localStorage.setItem('user', JSON.stringify(response.data));
         localStorage.setItem('isLoggedIn', 'true');
+        localStorage.setItem('tokenTimestamp', Date.now().toString());
       }
       
       return response.data;
@@ -276,6 +313,7 @@ disableMFA: async (token, password) => {
         localStorage.setItem('token', mockUser.token);
         localStorage.setItem('user', JSON.stringify(mockUser));
         localStorage.setItem('isLoggedIn', 'true');
+        localStorage.setItem('tokenTimestamp', Date.now().toString());
         
         return mockUser;
       }
@@ -285,62 +323,70 @@ disableMFA: async (token, password) => {
   },
   
   // Recuperación de contraseña
-// Funciones a añadir/modificar en auth.service.js para recuperación de contraseña
-
-// Recuperar contraseña
-forgotPassword: async (email) => {
-  try {
-    const response = await api.post('/users/forgot-password', { email });
-    return response.data;
-  } catch (error) {
-    console.error('Error en forgotPassword:', error);
-    
-    // Si estamos en modo desarrollo o simulación
-    if (!isDevelopment || error.message === 'Network Error' || error.response?.status === 404) {
-      console.log('Simulando envío de correo de recuperación a:', email);
+  forgotPassword: async (email) => {
+    try {
+      const response = await api.post('/users/forgot-password', { email });
+      return response.data;
+    } catch (error) {
+      console.error('Error en forgotPassword:', error);
       
-      // Simular que se ha enviado el correo
-      return { 
-        success: true, 
-        message: 'Se ha enviado un correo electrónico con instrucciones para restablecer tu contraseña.' 
-      };
+      // Si estamos en modo desarrollo o simulación
+      if (!isDevelopment || error.message === 'Network Error' || error.response?.status === 404) {
+        console.log('Simulando envío de correo de recuperación a:', email);
+        
+        // Simular que se ha enviado el correo
+        return { 
+          success: true, 
+          message: 'Se ha enviado un correo electrónico con instrucciones para restablecer tu contraseña.' 
+        };
+      }
+      
+      // Si el email no existe
+      if (error.response?.status === 404) {
+        throw new Error('No existe una cuenta con ese correo electrónico.');
+      }
+      
+      throw error.response?.data || new Error('Error al enviar correo de recuperación');
     }
-    
-    // Si el email no existe
-    if (error.response?.status === 404) {
-      throw new Error('No existe una cuenta con ese correo electrónico.');
-    }
-    
-    throw error.response?.data || new Error('Error al enviar correo de recuperación');
-  }
-},
+  },
 
-// Restablecer contraseña
-resetPassword: async (token, newPassword) => {
-  try {
-    const response = await api.post(`/users/reset-password/${token}`, { password: newPassword });
-    return response.data;
-  } catch (error) {
-    console.error('Error en resetPassword:', error);
-    
-    // Si estamos en modo desarrollo o simulación
-    if (!isDevelopment || error.message === 'Network Error' || error.response?.status === 404) {
-      console.log('Simulando restablecimiento de contraseña con token:', token);
-      return { 
-        success: true, 
-        message: 'Contraseña actualizada correctamente.' 
-      };
+  // Restablecer contraseña
+  resetPassword: async (token, newPassword) => {
+    try {
+      // Validar contraseña
+      const passwordRegex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$/;
+      if (!passwordRegex.test(newPassword)) {
+        throw new Error('La contraseña debe tener al menos 8 caracteres, una letra mayúscula, una minúscula, un número y un carácter especial');
+      }
+      
+      const response = await api.post(`/users/reset-password/${token}`, { password: newPassword });
+      return response.data;
+    } catch (error) {
+      console.error('Error en resetPassword:', error);
+      
+      // Si estamos en modo desarrollo o simulación
+      if (!isDevelopment || error.message === 'Network Error' || error.response?.status === 404) {
+        // Validar contraseña incluso en simulación
+        const passwordRegex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$/;
+        if (!passwordRegex.test(newPassword)) {
+          throw new Error('La contraseña debe tener al menos 8 caracteres, una letra mayúscula, una minúscula, un número y un carácter especial');
+        }
+        
+        console.log('Simulando restablecimiento de contraseña con token:', token);
+        return { 
+          success: true, 
+          message: 'Contraseña actualizada correctamente.' 
+        };
+      }
+      
+      // Si el token es inválido o ha expirado
+      if (error.response?.status === 400) {
+        throw new Error('El enlace ha expirado o es inválido. Por favor, solicita un nuevo enlace.');
+      }
+      
+      throw error.response?.data || new Error('Error al restablecer contraseña');
     }
-    
-    // Si el token es inválido o ha expirado
-    if (error.response?.status === 400) {
-      throw new Error('El enlace ha expirado o es inválido. Por favor, solicita un nuevo enlace.');
-    }
-    
-    throw error.response?.data || new Error('Error al restablecer contraseña');
-  }
-},
-
+  },
 };
 
 export default authService;

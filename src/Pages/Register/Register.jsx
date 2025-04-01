@@ -21,6 +21,11 @@ const Register = () => {
     const [showPassword, setShowPassword] = useState(false);
     const [loading, setLoading] = useState(false);
     const [serverError, setServerError] = useState('');
+    const [passwordStrength, setPasswordStrength] = useState({
+        score: 0,
+        message: 'Muy débil',
+        color: '#ef4444'
+    });
 
     const handleChange = (e) => {
         const { name, value, type, checked } = e.target;
@@ -36,8 +41,63 @@ const Register = () => {
             });
         }
         
+        // Verificar fortaleza de contraseña si es el campo password
+        if (name === 'password') {
+            checkPasswordStrength(value);
+        }
+        
         // Limpiar error del servidor cuando el usuario comienza a escribir
         if (serverError) setServerError('');
+    };
+
+    // Función para evaluar la fortaleza de la contraseña
+    const checkPasswordStrength = (password) => {
+        // Criterios para una contraseña segura
+        const hasLowerCase = /[a-z]/.test(password);
+        const hasUpperCase = /[A-Z]/.test(password);
+        const hasNumber = /\d/.test(password);
+        const hasSpecialChar = /[@$!%*?&]/.test(password);
+        const hasMinLength = password.length >= 8;
+        
+        // Calcular puntuación (0-5)
+        let score = 0;
+        if (hasLowerCase) score++;
+        if (hasUpperCase) score++;
+        if (hasNumber) score++;
+        if (hasSpecialChar) score++;
+        if (hasMinLength) score++;
+        
+        // Determinar mensaje y color basado en puntuación
+        let message = '';
+        let color = '';
+        
+        switch (true) {
+            case (score <= 1):
+                message = 'Muy débil';
+                color = '#ef4444'; // Rojo
+                break;
+            case (score === 2):
+                message = 'Débil';
+                color = '#f59e0b'; // Naranja
+                break;
+            case (score === 3):
+                message = 'Media';
+                color = '#fbbf24'; // Amarillo
+                break;
+            case (score === 4):
+                message = 'Fuerte';
+                color = '#22c55e'; // Verde
+                break;
+            case (score === 5):
+                message = 'Muy fuerte';
+                color = '#16a34a'; // Verde oscuro
+                break;
+            default:
+                message = 'Muy débil';
+                color = '#ef4444';
+        }
+        
+        setPasswordStrength({ score, message, color });
     };
 
     const validate = () => {
@@ -63,8 +123,12 @@ const Register = () => {
 
         if (!formData.password) {
             newErrors.password = 'La contraseña es obligatoria';
-        } else if (formData.password.length < 6) {
-            newErrors.password = 'La contraseña debe tener al menos 6 caracteres';
+        } else {
+            // Validar que la contraseña cumpla con los requisitos
+            const passwordRegex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$/;
+            if (!passwordRegex.test(formData.password)) {
+                newErrors.password = 'La contraseña debe tener al menos 8 caracteres, una letra mayúscula, una minúscula, un número y un carácter especial';
+            }
         }
 
         if (formData.password !== formData.confirmPassword) {
@@ -220,7 +284,33 @@ const Register = () => {
                                 {showPassword ? 'Ocultar' : 'Mostrar'}
                             </button>
                         </div>
+                        {formData.password && (
+                            <div className="password-strength">
+                                <div className="strength-bar-container">
+                                    <div 
+                                        className="strength-bar" 
+                                        style={{
+                                            width: `${(passwordStrength.score / 5) * 100}%`,
+                                            backgroundColor: passwordStrength.color
+                                        }}
+                                    ></div>
+                                </div>
+                                <span className="strength-text" style={{ color: passwordStrength.color }}>
+                                    {passwordStrength.message}
+                                </span>
+                            </div>
+                        )}
                         {errors.password && <div className="error-message">{errors.password}</div>}
+                        <div className="password-requirements">
+                            <p>La contraseña debe contener:</p>
+                            <ul>
+                                <li className={formData.password.length >= 8 ? 'valid' : ''}>Al menos 8 caracteres</li>
+                                <li className={/[A-Z]/.test(formData.password) ? 'valid' : ''}>Al menos una letra mayúscula</li>
+                                <li className={/[a-z]/.test(formData.password) ? 'valid' : ''}>Al menos una letra minúscula</li>
+                                <li className={/\d/.test(formData.password) ? 'valid' : ''}>Al menos un número</li>
+                                <li className={/[@$!%*?&]/.test(formData.password) ? 'valid' : ''}>Al menos un carácter especial (@$!%*?&)</li>
+                            </ul>
+                        </div>
                     </div>
 
                     <div className="form-group">

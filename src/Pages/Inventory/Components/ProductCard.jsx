@@ -1,6 +1,6 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
-import useCart from '../../hooks/useCart';
+import { useCart } from '../../context/CartContext';
 import { useSocket } from '../../context/SocketContext';
 import './ProductCard.css';
 
@@ -13,7 +13,7 @@ import './ProductCard.css';
  */
 const ProductCard = ({ product }) => {
   const { addToCart } = useCart();
-  const { checkProductStock } = useSocket();
+  const { simulateStockAlert } = useSocket();
   
   // Ensure we have valid product data
   if (!product) return null;
@@ -38,8 +38,10 @@ const ProductCard = ({ product }) => {
     if (product && product.stock > 0) {
       addToCart(product, 1);
       
-      // Check product stock after adding to cart
-      checkProductStock(product);
+      // Simular alerta de stock bajo cuando el stock es menor o igual a 5
+      if (product.stock <= 5) {
+        simulateStockAlert(product);
+      }
       
       // Show toast notification
       const toast = document.createElement('div');

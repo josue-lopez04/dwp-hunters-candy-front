@@ -58,7 +58,7 @@ const Footer = () => {
           <ul className="contact-info">
             <li className="contact-item">
               <i className="fas fa-map-marker-alt contact-icon"></i>
-              <span>Av. Constitución 1500, Querétaro</span>
+              <span> hello --- Av. Constitución 1500, Querétaro</span>
             </li>
             <li className="contact-item">
               <i className="fas fa-phone-alt contact-icon"></i>

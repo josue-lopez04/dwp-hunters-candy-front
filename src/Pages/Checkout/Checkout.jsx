@@ -14,7 +14,7 @@ const Checkout = () => {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
   const [paymentMethod, setPaymentMethod] = useState('card');
-  const [processingMessage, setProcessingMessage] = useState('');
+  const [ setProcessingMessage] = useState('');
   const [shippingAddress, setShippingAddress] = useState({
     street: '',
     city: '',
